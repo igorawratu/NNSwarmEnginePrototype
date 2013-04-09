@@ -62,7 +62,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="SDL.lib SDLmain.lib opengl32.lib glu32.lib glew32.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;$(CPPREPO)\SDL-devel-1.2.15-VC\SDL-1.2.15\lib\x86&quot;"
+				AdditionalLibraryDirectories="&quot;$(CPPREPO)\SDL-devel-1.2.15-VC\SDL-1.2.15\lib\x86&quot;;&quot;$(CPPREPO)\glew-1.9.0\lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -177,7 +177,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\neuralnetwork.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\object.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\simulation.cpp"
 				>
 			</File>
 		</Filter>
@@ -188,6 +196,10 @@
 			>
 			<File
 				RelativePath=".\common.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GA.h"
 				>
 			</File>
 			<File

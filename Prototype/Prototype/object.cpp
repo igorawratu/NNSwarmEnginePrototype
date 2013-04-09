@@ -9,11 +9,13 @@ Object::Object()
     mColour.g = mColour.b = 0.0f;
     mVelMax.x = mVelMax.y = 1.0f;
     mVelMin.x = mVelMin.y = -1.0f;
+	mRenderable = true;
+	mReached = false;
 
     initBuffers();
 }
 
-Object::Object(vector2 position, vector4 colour, vector2 velMax, vector2 velMin)
+Object::Object(vector2 position, vector4 colour, vector2 velMax, vector2 velMin, bool renderable)
 {
     mVbname = mIbname = 0;
     mPosition = position;
@@ -21,8 +23,11 @@ Object::Object(vector2 position, vector4 colour, vector2 velMax, vector2 velMin)
     mVelocity.x = mVelocity.y = 0.0f;
     mVelMax = velMax;
     mVelMin = velMin;
+	mRenderable = renderable;
+	mReached = false;
 
-    initBuffers();
+	if(mRenderable)
+		initBuffers();
 }
 
 Object::Object(const Object& other)
@@ -33,8 +38,11 @@ Object::Object(const Object& other)
     mVelocity = other.mVelocity;
     mVelMax = other.mVelMax;
     mVelMin = other.mVelMin;
+	mRenderable = other.mRenderable;
+	mReached = other.mReached;
 
-    initBuffers();
+	if(mRenderable)
+		initBuffers();
 }
 
 Object::~Object()
@@ -58,8 +66,11 @@ Object& Object::operator=(const Object& other)
     mVelocity = other.mVelocity;
     mVelMax = other.mVelMax;
     mVelMin = other.mVelMin;
+	mRenderable = other.mRenderable;
+	mReached = other.mReached;
 
-    initBuffers();
+	if(mRenderable)
+		initBuffers();
 
     return *this;
 }
@@ -72,7 +83,9 @@ void Object::update()
 
 void Object::render()
 {
-    //find a way to pass the position as a matrix
+	if(!mRenderable)
+		return;
+
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
     glLoadIdentity();

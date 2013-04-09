@@ -9,6 +9,7 @@
 
 #include "object.h"
 #include "common.h"
+#include "simulation.cpp"
 
 using namespace std;
 
@@ -92,6 +93,7 @@ bool initializeOpenGL()
 
 void initializeModels()
 {
+	//use seed from training to generate positions
     vector2 position, velMax, velMin;
     vector4 colour;
 
@@ -166,19 +168,15 @@ void render()
     SDL_GL_SwapBuffers();
 }
 
-void update()
+void update(NeuralNetwork brain, vector2 goal)
 {
-    for(unsigned int k = 0; k < models.size(); k++)
-    {
-        //NN + accel update logic can go here
-        models[k]->update();
-    }
+    iterate(models, brain, goal);
 }
 
-bool frame()
+bool frame(NeuralNetwork brain, vector2 goal)
 {
     bool run = handleEvents();
-    update();
+    update(brain, goal);
     render();
 
     return run;
@@ -200,11 +198,16 @@ void shutdown()
 
 int main(int argc, char* args[]) 
 {
+	NeuralNetwork brain;
+	vector2 goal;
+	goal.x = 0.0f;
+	goal.y = 0.0f;
+
     initialize();
     bool run = true;
 
     while(run)
-        run = frame();
+        run = frame(brain, goal);
 
     shutdown();
 

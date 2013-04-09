@@ -17,7 +17,7 @@ class Object
 {
 public:
     Object();
-    Object(vector2 position, vector4 colour, vector2 velMax, vector2 velMin);
+    Object(vector2 position, vector4 colour, vector2 velMax, vector2 velMin, bool renderable);
     Object(const Object& other);
     ~Object();
 
@@ -28,6 +28,10 @@ public:
     
     void changeVelocity(vector2 acceleration);
 
+    vector2 getPosition(){return mPosition;}
+    void reached(){mReached = true;}
+    bool getReached(){return reached;}
+
 private:
     void initBuffers();
 
@@ -35,6 +39,7 @@ private:
     vector2 mPosition, mVelocity, mVelMax, mVelMin;
     vector4 mColour;
     GLuint mVbname, mIbname;
+    bool mRenderable, reached;
 };
 
 #endif
