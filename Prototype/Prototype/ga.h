@@ -7,7 +7,7 @@
 #include "boost/random.hpp"
 #include "boost/generator_iterator.hpp"
 
-#include "simulation.cpp"
+#include "simulation.h"
 #include "neuralnetwork.h"
 #include "object.h"
 #include "common.h"
@@ -26,8 +26,10 @@ struct GAParams
     unsigned int nnInputs;
     unsigned int nnHiddens;
     unsigned int nnOutputs;
-    vector2 modelSpaceMin;
-    vector2 modelSpaceMax;
+    vector2 modelMoveSpaceMin;
+    vector2 modelMoveSpaceMax;
+    vector2 modelInitSpaceMin;
+    vector2 modelInitSpaceMax;
     vector2 vMax;
     vector2 vMin;
     vector4 modelColour;
@@ -56,6 +58,7 @@ private:
 
 private:
     GAParams mParameters;
+    Simulation sim;
 };
 
 #endif

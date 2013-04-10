@@ -25,18 +25,19 @@ vector<Object*> GA::initializeModels(unsigned int initializationSeed)
 {
     vector<Object*> objects;
 
-    boost::mt19937 rng(initializationSeed);
-    boost::uniform_real<float> xDist(mParameters.vMin.x, mParameters.vMax.x);
-    boost::uniform_real<float> yDist(mParameters.vMin.y, mParameters.vMax.y);
-    boost::variate_generator<boost::mt19937, boost::uniform_real<float>> genx(rng, xDist);
-    boost::variate_generator<boost::mt19937, boost::uniform_real<float>> geny(rng, yDist);
+    boost::mt19937 rngx(initializationSeed);
+    boost::mt19937 rngy(initializationSeed * 2);
+    boost::uniform_real<float> xDist(mParameters.modelInitSpaceMin.x, mParameters.modelInitSpaceMax.x);
+    boost::uniform_real<float> yDist(mParameters.modelInitSpaceMin.y, mParameters.modelInitSpaceMax.y);
+    boost::variate_generator<boost::mt19937, boost::uniform_real<float>> genx(rngx, xDist);
+    boost::variate_generator<boost::mt19937, boost::uniform_real<float>> geny(rngy, yDist);
 
     for(unsigned int k = 0; k < mParameters.simulationPopulation; k++)
     {
         vector2 pos;
         pos.x = genx();
         pos.y = geny();
-        objects.push_back(new Object(pos, mParameters.modelColour, mParameters.vMax, mParameters.vMin, false));
+        objects.push_back(new Object(pos, mParameters.modelColour, mParameters.vMax, mParameters.vMin, mParameters.modelMoveSpaceMax, mParameters.modelMoveSpaceMin, false));
     }
 
     return objects;
@@ -97,7 +98,7 @@ NeuralNetwork GA::train(unsigned int& initializationSeed, vector2 goal)
         //evaluate population
         for(unsigned int i = 0; i < mParameters.GApopulation; i++)
         {
-            float fitness = run(mParameters.simulationCycles, population[i], objects, goal);
+            float fitness = sim.run(mParameters.simulationCycles, population[i], objects, goal);
             population[i].setFitness(fitness);
             if(fitness == 0.0f)
             {
@@ -125,9 +126,18 @@ NeuralNetwork GA::train(unsigned int& initializationSeed, vector2 goal)
         }
     }
 
-    return population[smallestPos];
+    return getBest(population, 1)[0];
 }
 
 vector<NeuralNetwork> GA::getBest(vector<NeuralNetwork> population, unsigned int amount)
 {
+    vector<NeuralNetwork> output;
+
+    //sort population according to fitness here
+
+    unsigned int stop = (amount > population.size()) ? population.size() : amount;
+    for(int k = 0; k < stop; k++)
+        output.push_back(population[k]);
+
+    return output;
 }

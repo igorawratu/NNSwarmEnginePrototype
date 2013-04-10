@@ -3,8 +3,12 @@
 
 #include <vector>
 #include <iostream>
+#include <math.h>
+#include <assert.h>
 
 using namespace std;
+
+const double e = 2.71828;
 
 class NeuralNetwork
 {

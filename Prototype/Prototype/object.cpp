@@ -11,11 +11,13 @@ Object::Object()
     mVelMin.x = mVelMin.y = -1.0f;
 	mRenderable = true;
 	mReached = false;
+    mMoveMax.x = mMoveMax.y = 1.0f;
+    mMoveMin.x = mMoveMin.y = -1.0f;
 
     initBuffers();
 }
 
-Object::Object(vector2 position, vector4 colour, vector2 velMax, vector2 velMin, bool renderable)
+Object::Object(vector2 position, vector4 colour, vector2 velMax, vector2 velMin, vector2 moveMax, vector2 moveMin, bool renderable)
 {
     mVbname = mIbname = 0;
     mPosition = position;
@@ -25,6 +27,8 @@ Object::Object(vector2 position, vector4 colour, vector2 velMax, vector2 velMin,
     mVelMin = velMin;
 	mRenderable = renderable;
 	mReached = false;
+    mMoveMax = moveMax;
+    mMoveMin = moveMin;
 
 	if(mRenderable)
 		initBuffers();
@@ -40,6 +44,8 @@ Object::Object(const Object& other)
     mVelMin = other.mVelMin;
 	mRenderable = other.mRenderable;
 	mReached = other.mReached;
+    mMoveMin = other.mMoveMin;
+    mMoveMax = other.mMoveMax;
 
 	if(mRenderable)
 		initBuffers();
@@ -68,6 +74,8 @@ Object& Object::operator=(const Object& other)
     mVelMin = other.mVelMin;
 	mRenderable = other.mRenderable;
 	mReached = other.mReached;
+    mMoveMin = other.mMoveMin;
+    mMoveMax = other.mMoveMax;
 
 	if(mRenderable)
 		initBuffers();
@@ -79,6 +87,29 @@ void Object::update()
 {
     mPosition.x += mVelocity.x;
     mPosition.y += mVelocity.y;
+
+    //bounds checking
+    if(mPosition.x > mMoveMax.x)
+    {
+        mPosition.x -= 2 * (mPosition.x - mMoveMax.x);
+        mVelocity.x = -mVelocity.x;
+    }
+    else if(mPosition.x < mMoveMin.x)
+    {
+        mPosition.x += 2 * (mMoveMin.x - mPosition.x);
+        mVelocity.x = -mVelocity.x;
+    }
+    
+    if(mPosition.y > mMoveMax.y)
+    {
+        mPosition.y -= 2 * (mPosition.y - mMoveMax.y);
+        mVelocity.y = -mVelocity.y;
+    }
+    else if(mPosition.y < mMoveMin.y)
+    {
+        mPosition.y += 2 * (mMoveMin.y - mPosition.y);
+        mVelocity.y = -mVelocity.y;
+    }
 }
 
 void Object::render()

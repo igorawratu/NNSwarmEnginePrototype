@@ -1,27 +1,13 @@
-#ifndef SIMULATION_C
-#define SIMULATION_C
+#include "simulation.h"
 
-#include "object.h"
-#include "common.h"
-#include "neuralnetwork.h"
-
-#include <vector>
-#include <iostream>
-#include <assert.h>
-
-using namespace std;
-
-const float EPSILON = 25.0f;
-const float MAXDISTANCESQUARED = 62500.0f;
-
-float calcDistanceSquared(vector2 from, vector2 to)
+float Simulation::calcDistanceSquared(vector2 from, vector2 to)
 {
 	float x = from.x - to.x;
 	float y = from.y - to.y;
 	return x*x + y*y;
 }
 
-void iterate(vector<Object*>& objects, NeuralNetwork brain, vector2 goal)
+void Simulation::iterate(vector<Object*>& objects, NeuralNetwork brain, vector2 goal)
 {
 	for(unsigned int k = 0; k < objects.size(); k++)
 	{
@@ -29,7 +15,7 @@ void iterate(vector<Object*>& objects, NeuralNetwork brain, vector2 goal)
 		bool status;
 
 		inputs.push_back(objects[k]->getPosition().x); inputs.push_back(objects[k]->getPosition().y);
-		inputs.push_back(goal.x); inputs.push_back(goal.x);
+		inputs.push_back(goal.x); inputs.push_back(goal.y);
 
 		output = brain.evaluate(inputs, status);
 		assert(status);
@@ -44,9 +30,9 @@ void iterate(vector<Object*>& objects, NeuralNetwork brain, vector2 goal)
 	}
 }
 
-float run(unsigned int cycles, NeuralNetwork brain, vector<Object*> objects, vector2 goal)
+float Simulation::run(unsigned int cycles, NeuralNetwork brain, vector<Object*> objects, vector2 goal)
 {
-	float finalFitness = objects.size() + 1.0f;
+	float finalFitness = objects.size();
 	for(unsigned int k = 0; k < cycles; k++)
 	{
 		for(unsigned int i = 0; i < objects.size(); i++)
@@ -71,5 +57,3 @@ float run(unsigned int cycles, NeuralNetwork brain, vector<Object*> objects, vec
 
 	return finalFitness;
 }
-
-#endif

@@ -7,10 +7,13 @@
 #include "gl/glew.h"
 #include "SDL.h"
 #include "SDL_opengl.h"
+#include "boost/random.hpp"
+#include "boost/generator_iterator.hpp"
 
 #include "object.h"
 #include "common.h"
-#include "simulation.cpp"
+#include "simulation.h"
+#include "ga.h"
 
 using namespace std;
 
@@ -20,7 +23,9 @@ const unsigned int BITDEPTH = 32;
 
 GLuint shadername;
 vector<Object*> models;
-
+Object* goalObject;
+vector2 goal;
+Simulation sim;
 void initializeShader()
 {
     GLint shaderCompiled;
@@ -92,27 +97,34 @@ bool initializeOpenGL()
     return true;
 }
 
-void initializeModels()
+void initializeModels(unsigned int seed, GAParams parameters)
 {
 	//use seed from training to generate positions
-    vector2 position, velMax, velMin;
+    vector2 velMax, velMin, moveMax, moveMin;
     vector4 colour;
+    boost::mt19937 rngx(seed);
+    boost::mt19937 rngy(seed * 2);
+    boost::uniform_real<float> xDist(parameters.modelInitSpaceMin.x, parameters.modelInitSpaceMax.x);
+    boost::uniform_real<float> yDist(parameters.modelInitSpaceMin.y, parameters.modelInitSpaceMax.y);
+    boost::variate_generator<boost::mt19937, boost::uniform_real<float>> genx(rngx, xDist);
+    boost::variate_generator<boost::mt19937, boost::uniform_real<float>> geny(rngy, yDist);
 
     colour.r = colour.b = 0;
     colour.g = colour.a = 1.0f;
-    position.x = WIDTH/2;
-    position.y = HEIGHT/2;
-    velMin.x = velMin.y = -1;
-    velMax.x = velMax.y = 1;
+    velMax.x = velMax.y = velMin.x = velMin.y = moveMax.x = moveMax.y = moveMin.x = moveMin.y = 0.0f;
 
-    models.push_back(new Object(position, colour, velMax, velMin, true));
-    models.push_back(new Object(position, colour, velMax, velMin, true));
+    goalObject = new Object(goal, colour, velMax, velMin, moveMax, moveMin, true);
 
-    models[0]->changeVelocity(velMax);
-    models[1]->changeVelocity(velMin);
+    for(unsigned int k = 0; k < parameters.simulationPopulation; k++)
+    {
+        vector2 pos;
+        pos.x = genx();
+        pos.y = geny();
+        models.push_back(new Object(pos, parameters.modelColour, parameters.vMax, parameters.vMin, parameters.modelMoveSpaceMax, parameters.modelMoveSpaceMin, true));
+    }
 }
 
-bool initialize()
+bool initialize(unsigned int seed, GAParams parameters)
 {
     if(SDL_Init(SDL_INIT_EVERYTHING) < 0)
         return false;
@@ -125,7 +137,7 @@ bool initialize()
 
     SDL_WM_SetCaption("Prototype", NULL);
 
-    initializeModels();
+    initializeModels(seed, parameters);
 
     return true;
 }
@@ -161,6 +173,8 @@ void render()
     for(unsigned int k = 0; k < models.size(); k++)
         models[k]->render();
 
+    goalObject->render();
+
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);
 
@@ -171,13 +185,14 @@ void render()
 
 void update(NeuralNetwork brain, vector2 goal)
 {
-    iterate(models, brain, goal);
+    sim.iterate(models, brain, goal);
 }
 
-bool frame(NeuralNetwork brain, vector2 goal)
+bool frame(NeuralNetwork brain, vector2 goal, bool complete)
 {
     bool run = handleEvents();
-    update(brain, goal);
+    if(!complete)
+        update(brain, goal);
     render();
 
     return run;
@@ -194,23 +209,62 @@ void shutdown()
         models[k] = 0;
     }
 
+    delete goalObject;
+    goalObject = 0;
+
     SDL_Quit();
 }
 
 int main(int argc, char* args[]) 
 {
     srand(time(0));
+    GAParams parameters;
+    vector2 vMax, vMin, mmsMin, mmsMax, misMin, misMax;
+    vector4 col;
 
-	NeuralNetwork brain;
-	vector2 goal;
-	goal.x = 0.0f;
-	goal.y = 0.0f;
+    vMax.x = vMax.y = 2.0f; 
+    vMin.x = vMin.y = -2.0f;
+    mmsMax.x = (float)WIDTH;
+    mmsMax.y = (float)HEIGHT;
+    misMax.x = (float)WIDTH/2;
+    misMax.y = (float)HEIGHT;
+    col.g = col.b = 0.0f;
+    col.r = col.a = 1.0f;
+    
+    parameters.GApopulation = 1;
+    parameters.simulationPopulation = 50;
+    parameters.searchSpaceMax = 5.0f;
+    parameters.searchSpaceMin = -5.0f;
+    parameters.maxGenerations = 1;
+    parameters.simulationCycles = 2000;
+    parameters.nnInputs = 4;
+    parameters.nnHiddens = 0;
+    parameters.nnOutputs = 2;
+    parameters.modelMoveSpaceMin = mmsMin;
+    parameters.modelMoveSpaceMax = mmsMax;
+    parameters.modelInitSpaceMin = misMin;
+    parameters.modelInitSpaceMax = misMax;
+    parameters.vMax = vMax;
+    parameters.vMin = vMin;
+    parameters.modelColour = col;
+    parameters.maxFitness = 50.0f;
+        
+    GA ga(parameters);
 
-    initialize();
+    goal.x = (float)WIDTH - 10.0f;
+    goal.y = (float)HEIGHT/2;
+
+    unsigned int seed, counter = 0;
+
+    NeuralNetwork brain = ga.train(seed, goal);
+
+    cout << "FITNESS: " << brain.getFitness() << endl;
+
+    initialize(seed, parameters);
     bool run = true;
 
     while(run)
-        run = frame(brain, goal);
+        run = frame(brain, goal, counter++ >= parameters.simulationCycles);
 
     shutdown();
 

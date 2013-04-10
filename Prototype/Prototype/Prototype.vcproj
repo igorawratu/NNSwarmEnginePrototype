@@ -214,6 +214,10 @@
 				RelativePath=".\object.h"
 				>
 			</File>
+			<File
+				RelativePath=".\simulation.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

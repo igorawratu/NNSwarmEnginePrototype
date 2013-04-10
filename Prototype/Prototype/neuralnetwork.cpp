@@ -107,3 +107,15 @@ bool NeuralNetwork::setWeights(vector<float> weights)
     else return false;
 
 }
+
+float NeuralNetwork::activationFunc(vector<float> inputs, vector<float> weightVec)
+{
+    assert(inputs.size() + 1 == weightVec.size());
+    double powerVal = 0.0f;
+
+    for(int k = 0; k < inputs.size(); k++)
+        powerVal += weightVec[k] * inputs[k];
+    powerVal += -1 * weightVec[weightVec.size() - 1];
+
+    return (1/(1 + pow(e, powerVal)) - 0.5)/100;
+}
