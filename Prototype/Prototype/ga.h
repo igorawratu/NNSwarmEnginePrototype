@@ -33,6 +33,8 @@ struct GAParams
     vector4 modelColour;
     float maxFitness;
 };
+
+
 class GA
 {
 public:
@@ -42,7 +44,7 @@ public:
     ~GA(){}
 
     NeuralNetwork train(unsigned int& initializationSeed, vector2 goal);
-    void setParameters(GAParams parameters){mParameters = parameters};
+    void setParameters(GAParams parameters){mParameters = parameters;};
 
 private:
     GA(){}

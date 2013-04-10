@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <iostream>
+#include <assert.h>
 
 using namespace std;
 
@@ -45,7 +46,7 @@ void iterate(vector<Object*>& objects, NeuralNetwork brain, vector2 goal)
 
 float run(unsigned int cycles, NeuralNetwork brain, vector<Object*> objects, vector2 goal)
 {
-	float finalFitness = objects.size() + 1;
+	float finalFitness = objects.size() + 1.0f;
 	for(unsigned int k = 0; k < cycles; k++)
 	{
 		for(unsigned int i = 0; i < objects.size(); i++)
