@@ -16,7 +16,7 @@ using namespace std;
 
 struct GAParams
 {
-    GAParams() : GApopulation(0), simulationPopulation(0), searchSpaceMax(1.0f), searchSpaceMin(-1.0f), maxGenerations(1), simulationCycles(1), nnInputs(1), nnHiddens(0), nnOutputs(1), maxFitness(1){}
+    GAParams() : GApopulation(0), simulationPopulation(0), searchSpaceMax(1.0f), searchSpaceMin(-1.0f), maxGenerations(1), simulationCycles(1), nnInputs(1), nnHiddens(0), nnOutputs(1), maxFitness(1), elitismCount(0){}
     unsigned int GApopulation;
     unsigned int simulationPopulation;
     float searchSpaceMax;
@@ -34,6 +34,7 @@ struct GAParams
     vector2 vMin;
     vector4 modelColour;
     float maxFitness;
+    unsigned int elitismCount;
 };
 
 
@@ -55,6 +56,9 @@ private:
     void cleanupModels(vector<Object*> models);
     vector<NeuralNetwork> initializePopulation();
     vector<NeuralNetwork> getBest(vector<NeuralNetwork> population, unsigned int amount);
+    NeuralNetwork crossover(vector<NeuralNetwork> population);
+    NeuralNetwork mutate(NeuralNetwork);
+    void quicksort(vector<NeuralNetwork>& elements, int left, int right);
 
 private:
     GAParams mParameters;

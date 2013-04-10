@@ -79,10 +79,19 @@ vector<NeuralNetwork> GA::initializePopulation()
     return population;
 }
 
+NeuralNetwork GA::crossover(vector<NeuralNetwork> population)
+{
+}
 
+NeuralNetwork NeuralNetwork::mutate(NeuralNetwork)
+{
+
+}
 
 NeuralNetwork GA::train(unsigned int& initializationSeed, vector2 goal)
 {
+    assert(mParameters.GApopulation > mParameters.elitismCount); 
+
     initializationSeed = time(0);
     vector<NeuralNetwork> population = initializePopulation();
     assert(population.size() > 0);
@@ -95,7 +104,6 @@ NeuralNetwork GA::train(unsigned int& initializationSeed, vector2 goal)
 
     for(unsigned int k = 0; k < mParameters.maxGenerations; k++)
     {
-        //evaluate population
         for(unsigned int i = 0; i < mParameters.GApopulation; i++)
         {
             float fitness = sim.run(mParameters.simulationCycles, population[i], objects, goal);
@@ -107,24 +115,16 @@ NeuralNetwork GA::train(unsigned int& initializationSeed, vector2 goal)
             }
         }
 
-        //crossover
+        vector<NeuralNetwork> newPopulation = getBest(population, mParameters.elitismCount);
+        while(newPopulation.size() < population.size())
+            newPopulation.push_back(crossover(population));
 
-        //gaussian mutation
-
+        population = newPopulation;
+        for(int i = 0; i < population.size(); i++)
+            population[i] = mutate(population[i]);
     }
 
     cleanupModels(objects);
-
-    float smallestFitness = mParameters.maxFitness + mParameters.maxFitness/100.0f;
-    unsigned int smallestPos = 0;
-    for(unsigned int k = 0; k < population.size(); k++)
-    {
-        if(population[k].getFitness() < smallestFitness)
-        {
-            smallestFitness = population[k].getFitness();
-            smallestPos = k;
-        }
-    }
 
     return getBest(population, 1)[0];
 }
@@ -133,11 +133,37 @@ vector<NeuralNetwork> GA::getBest(vector<NeuralNetwork> population, unsigned int
 {
     vector<NeuralNetwork> output;
 
-    //sort population according to fitness here
+    quicksort(population);
 
     unsigned int stop = (amount > population.size()) ? population.size() : amount;
     for(int k = 0; k < stop; k++)
         output.push_back(population[k]);
 
     return output;
+}
+
+void GA::quicksort(vector<NeuralNetwork>& elements, int left, int right)
+{
+	int i = left;
+	int j = right;
+
+	NeuralNetwork pivot = particles[(left+ right) / 2];
+	do
+	{
+		while (elements[i]->getFitness() > pivot->getFitness())
+			i++;
+		while (elements[j]->getFitness() < pivot->getFitness())
+			j--;
+
+		if (i <= j)
+		{
+			NeuralNetwork temp = elements[i]; elements[i] = elements[j]; elements[j] = temp;
+			i++; j--;
+		}
+	} while (i <= j);
+
+	if (left < j)
+		quicksort(elements, left, j);
+	if (i < right)
+		quicksort(elements, i, right);
 }
