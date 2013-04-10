@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <time.h>
 
 #include "gl/glew.h"
 #include "SDL.h"
@@ -104,8 +105,8 @@ void initializeModels()
     velMin.x = velMin.y = -1;
     velMax.x = velMax.y = 1;
 
-    models.push_back(new Object(position, colour, velMax, velMin));
-    models.push_back(new Object(position, colour, velMax, velMin));
+    models.push_back(new Object(position, colour, velMax, velMin, true));
+    models.push_back(new Object(position, colour, velMax, velMin, true));
 
     models[0]->changeVelocity(velMax);
     models[1]->changeVelocity(velMin);
@@ -198,6 +199,8 @@ void shutdown()
 
 int main(int argc, char* args[]) 
 {
+    srand(time(0));
+
 	NeuralNetwork brain;
 	vector2 goal;
 	goal.x = 0.0f;

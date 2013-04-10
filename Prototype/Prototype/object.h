@@ -30,7 +30,7 @@ public:
 
     vector2 getPosition(){return mPosition;}
     void reached(){mReached = true;}
-    bool getReached(){return reached;}
+    bool getReached(){return mReached;}
 
 private:
     void initBuffers();
@@ -39,7 +39,7 @@ private:
     vector2 mPosition, mVelocity, mVelMax, mVelMin;
     vector4 mColour;
     GLuint mVbname, mIbname;
-    bool mRenderable, reached;
+    bool mRenderable, mReached;
 };
 
 #endif

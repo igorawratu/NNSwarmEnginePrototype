@@ -173,6 +173,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\ga.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\main.cpp"
 				>
 			</File>
@@ -199,7 +203,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\GA.h"
+				RelativePath=".\ga.h"
 				>
 			</File>
 			<File
