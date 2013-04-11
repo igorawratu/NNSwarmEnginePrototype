@@ -249,6 +249,7 @@ int main(int argc, char* args[])
     parameters.modelColour = col;
     parameters.maxFitness = 50.0f;
     parameters.elitismCount = 5;
+    parameters.mutationProb = 0.02f;
         
     GA ga(parameters);
 

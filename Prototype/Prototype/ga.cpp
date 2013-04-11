@@ -83,9 +83,44 @@ NeuralNetwork GA::crossover(vector<NeuralNetwork> population)
 {
 }
 
-NeuralNetwork NeuralNetwork::mutate(NeuralNetwork)
+float NeuralNetwork::calculateStandardDeviation(vector<NeuralNetwork> population, NeuralNetwork current, unsigned int position)
 {
+    float stdv = 0.0f, mean = 0.0f;
+    for(int k = 0; k < population.size(); k++)
+        mean += fabs(current.getWeights()[position] - population[k].getWeights()[position]);
+    mean /= current.getWeights().size();
+    
+    for(int k = 0; k < population.size(); k++)
+    {
+        float curr = fabs(current.getWeights()[position] - population[k].getWeights()[position]) - mean;
+        stdv += curr * curr;
+    }
 
+    stdv /= population.size() - 1;
+    
+    return sqrt(stdv);
+}
+
+NeuralNetwork NeuralNetwork::mutate(NeuralNetwork network, vector<float> deviations)
+{
+    assert(mParameters.mutationProb <= 1.0f && mutationProb >= 0.0f);
+
+    boost::mt19937 mutation(rand());
+    boost::uniform_real<float> mutationProbDist(0, 1);
+    boost::variate_generator<boost::mt19937, boost::uniform_real<float>> genMutationProb(mutation, mutationProbDist);
+
+    vector<float> weights = network.getWeights();
+    for(int k = 0; k < weights.size(); k++)
+    {
+        boost::normal_distribution<> normDist(0, deviations[k]);
+	    boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > genMutation(mutation, normDist);
+
+        if(genMutationProb() <= mParameters.mutationProb)
+            weights[k] += genMutation();
+    }
+    network.setWeights(weights);
+
+    return network;
 }
 
 NeuralNetwork GA::train(unsigned int& initializationSeed, vector2 goal)
@@ -98,9 +133,6 @@ NeuralNetwork GA::train(unsigned int& initializationSeed, vector2 goal)
 
     vector<Object*> objects = initializeModels(initializationSeed);
     assert(objects.size() > 0);
-
-    boost::mt19937 rng(rand());
-    boost::uniform_int<> crossoverSelectionDist(0, population.size() - 1);
 
     for(unsigned int k = 0; k < mParameters.maxGenerations; k++)
     {
@@ -120,8 +152,16 @@ NeuralNetwork GA::train(unsigned int& initializationSeed, vector2 goal)
             newPopulation.push_back(crossover(population));
 
         population = newPopulation;
+        
         for(int i = 0; i < population.size(); i++)
-            population[i] = mutate(population[i]);
+        {
+            vector<float> deviations;
+
+            for(int l = 0; l < population[i].getWeights().size(); l++)
+                deviations.push_back(calculateStandardDeviation(population, population[i], l);
+
+            population[i] = mutate(population[i], deviations);
+        }
     }
 
     cleanupModels(objects);

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <time.h>
+#include <math.h>
 
 #include "boost/random.hpp"
 #include "boost/generator_iterator.hpp"
@@ -16,7 +17,8 @@ using namespace std;
 
 struct GAParams
 {
-    GAParams() : GApopulation(0), simulationPopulation(0), searchSpaceMax(1.0f), searchSpaceMin(-1.0f), maxGenerations(1), simulationCycles(1), nnInputs(1), nnHiddens(0), nnOutputs(1), maxFitness(1), elitismCount(0){}
+    GAParams() : GApopulation(0), simulationPopulation(0), searchSpaceMax(1.0f), searchSpaceMin(-1.0f), maxGenerations(1), simulationCycles(1), 
+        nnInputs(1), nnHiddens(0), nnOutputs(1), maxFitness(1), elitismCount(0), mutationProb(0.0f){}
     unsigned int GApopulation;
     unsigned int simulationPopulation;
     float searchSpaceMax;
@@ -35,6 +37,7 @@ struct GAParams
     vector4 modelColour;
     float maxFitness;
     unsigned int elitismCount;
+    float mutationProb;
 };
 
 
@@ -57,8 +60,9 @@ private:
     vector<NeuralNetwork> initializePopulation();
     vector<NeuralNetwork> getBest(vector<NeuralNetwork> population, unsigned int amount);
     NeuralNetwork crossover(vector<NeuralNetwork> population);
-    NeuralNetwork mutate(NeuralNetwork);
+    NeuralNetwork mutate(NeuralNetwork net, vector<float> deviations);
     void quicksort(vector<NeuralNetwork>& elements, int left, int right);
+    float calculateStandardDeviation(vector<NeuralNetwork> population, NeuralNetwork current, unsigned int position);
 
 private:
     GAParams mParameters;
