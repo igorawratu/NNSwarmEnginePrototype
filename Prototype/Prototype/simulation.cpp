@@ -9,20 +9,27 @@ float Simulation::calcDistanceSquared(vector2 from, vector2 to)
 
 void Simulation::iterate(vector<Object*>& objects, NeuralNetwork brain, vector2 goal)
 {
-	for(unsigned int k = 0; k < objects.size(); k++)
+    #pragma omp parallel for
+	for(int k = 0; k < objects.size(); k++)
 	{
 		vector<float> inputs, output;
 		bool status;
 
-		inputs.push_back(objects[k]->getPosition().x); inputs.push_back(objects[k]->getPosition().y);
-		inputs.push_back(goal.x); inputs.push_back(goal.y);
+        float x, y, gx, gy;
+        x = objects[k]->getPosition().x/((float)WIDTH / 2.0f) - 1.0f;
+        y = objects[k]->getPosition().y/((float)HEIGHT / 2.0f) - 1.0f;
+        gx = goal.x/((float)WIDTH / 2.0f) - 1.0f;
+        gy = goal.y/((float)HEIGHT / 2.0f) - 1.0f;
+
+		inputs.push_back(x); inputs.push_back(y);
+		inputs.push_back(gx); inputs.push_back(gy);
 
 		output = brain.evaluate(inputs, status);
 		assert(status);
 
 		vector2 acceleration;
-		acceleration.x = output[0];
-		acceleration.y = output[1];
+		acceleration.x = 2 * ((output[0] - 0.5f)) / 5;
+		acceleration.y = 2 * ((output[1] - 0.5f)) / 5;
 
 		objects[k]->changeVelocity(acceleration);
 
@@ -37,7 +44,7 @@ float Simulation::run(unsigned int cycles, NeuralNetwork brain, vector<Object*> 
 	{
 		for(unsigned int i = 0; i < objects.size(); i++)
 			if(calcDistanceSquared(objects[i]->getPosition(), goal) < EPSILON)
-				objects[i]->reached();
+				objects[i]->setReached(true);
 		iterate(objects, brain, goal);
 	}
 

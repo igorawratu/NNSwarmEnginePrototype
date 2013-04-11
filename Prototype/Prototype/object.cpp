@@ -89,7 +89,7 @@ void Object::update()
     mPosition.y += mVelocity.y;
 
     //bounds checking
-    if(mPosition.x > mMoveMax.x)
+    /*if(mPosition.x > mMoveMax.x)
     {
         mPosition.x -= 2 * (mPosition.x - mMoveMax.x);
         mVelocity.x = -mVelocity.x;
@@ -109,7 +109,7 @@ void Object::update()
     {
         mPosition.y += 2 * (mMoveMin.y - mPosition.y);
         mVelocity.y = -mVelocity.y;
-    }
+    }*/
 }
 
 void Object::render()

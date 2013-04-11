@@ -81,7 +81,7 @@ vector<float> NeuralNetwork::evaluate(vector<float> input, bool& status)
         }
         
         unsigned int initial = mHiddenCount * (mInputCount + 1);
-        for(unsigned int k = 0; k < mHiddenCount; k++)
+        for(unsigned int k = 0; k < mOutputCount; k++)
         {
             vector<float> weightVec;
             unsigned int max = (k + 1) * mHiddenCount + k + 1;
@@ -90,7 +90,7 @@ vector<float> NeuralNetwork::evaluate(vector<float> input, bool& status)
             for(unsigned int i = initial + next; i < initial + max; i++)
                 weightVec.push_back(mWeights[i]);
 
-            output.push_back(activationFunc(input, weightVec));
+            output.push_back(activationFunc(hidden, weightVec));
         }
     }
 
@@ -117,5 +117,5 @@ float NeuralNetwork::activationFunc(vector<float> inputs, vector<float> weightVe
         powerVal += weightVec[k] * inputs[k];
     powerVal += -1 * weightVec[weightVec.size() - 1];
 
-    return (1/(1 + pow(e, powerVal)) - 0.5)/100;
+    return 1/(1 + pow(e, 0.002 * powerVal));
 }

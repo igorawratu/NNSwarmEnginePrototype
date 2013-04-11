@@ -29,7 +29,7 @@ public:
     void changeVelocity(vector2 acceleration);
 
     vector2 getPosition(){return mPosition;}
-    void reached(){mReached = true;}
+    void setReached(bool reached){mReached = reached;}
     bool getReached(){return mReached;}
 
 private:

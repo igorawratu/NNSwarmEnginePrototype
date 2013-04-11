@@ -73,21 +73,72 @@ vector<NeuralNetwork> GA::initializePopulation()
             cout << "unable to set weights for a neural net, check calculations" << endl;
             return population;
         }
+        currNetwork.setFitness(mParameters.maxFitness);
         population.push_back(currNetwork);
     }
 
     return population;
 }
 
-NeuralNetwork GA::crossover(vector<NeuralNetwork> population)
+NeuralNetwork GA::selectParent(vector<NeuralNetwork> population, unsigned int& rank)
 {
+    unsigned int max = 0;
+    for(int k = 1; k <= population.size(); k++)
+        max += k;
+
+    boost::mt19937 rankRng(rand());
+    boost::uniform_int<> rankDist(1, max);
+    boost::variate_generator<boost::mt19937, boost::uniform_int<>> genSelection(rankRng, rankDist);
+
+    int selection = genSelection();
+
+    unsigned int k = -1;
+    while(selection > 0)
+        selection -= population.size() - ++k;
+
+    assert(k >= 0);
+    assert(k < population.size());
+
+    rank = k;
+    return population[k];
 }
 
-float NeuralNetwork::calculateStandardDeviation(vector<NeuralNetwork> population, NeuralNetwork current, unsigned int position)
+NeuralNetwork GA::crossover(vector<NeuralNetwork> population)
+{
+    unsigned int p1rank;
+    NeuralNetwork parent1 = selectParent(population, p1rank);
+    unsigned int p2rank = p1rank;
+
+    NeuralNetwork parent2(mParameters.nnInputs, mParameters.nnOutputs, mParameters.nnHiddens);
+    while(p2rank == p1rank)
+        parent2 = selectParent(population, p2rank);
+    NeuralNetwork child(mParameters.nnInputs, mParameters.nnOutputs, mParameters.nnHiddens);
+    
+    boost::mt19937 mutation(rand());
+    
+    vector<float> weights;
+    for(int k = 0; k < parent1.getWeights().size(); k++)
+    {
+        boost::normal_distribution<> normDist((parent1.getWeights()[k] + parent2.getWeights()[k]) / 2 , fabs(parent1.getWeights()[k] - parent2.getWeights()[k]));
+	    boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > genCrossover(mutation, normDist);
+        
+        float val = genCrossover();
+        weights.push_back(val);
+    }
+
+    child.setWeights(weights);
+    child.setFitness(mParameters.maxFitness);
+
+    return child;
+}
+
+float GA::calculateStandardDeviation(vector<NeuralNetwork> population, NeuralNetwork current, unsigned int position)
 {
     float stdv = 0.0f, mean = 0.0f;
+
     for(int k = 0; k < population.size(); k++)
         mean += fabs(current.getWeights()[position] - population[k].getWeights()[position]);
+
     mean /= current.getWeights().size();
     
     for(int k = 0; k < population.size(); k++)
@@ -101,9 +152,26 @@ float NeuralNetwork::calculateStandardDeviation(vector<NeuralNetwork> population
     return sqrt(stdv);
 }
 
-NeuralNetwork NeuralNetwork::mutate(NeuralNetwork network, vector<float> deviations)
+void GA::conformWeights(vector<NeuralNetwork>& population)
 {
-    assert(mParameters.mutationProb <= 1.0f && mutationProb >= 0.0f);
+    for(int k = 0; k < population.size(); k++)
+    {
+        vector<float> weights = population[k].getWeights();
+
+        for(int i = 0; i < weights.size(); i++)
+        {
+            if(weights[i] > mParameters.searchSpaceMax)
+                weights[i] = mParameters.searchSpaceMin + fmod(weights[i] - mParameters.searchSpaceMax, mParameters.searchSpaceMax - mParameters.searchSpaceMin);
+            else if(weights[i] < mParameters.searchSpaceMin)
+                weights[i] = mParameters.searchSpaceMax - fmod(mParameters.searchSpaceMin - weights[i], mParameters.searchSpaceMax - mParameters.searchSpaceMin);
+        }
+        population[k].setWeights(weights);
+    }
+}
+
+NeuralNetwork GA::mutate(NeuralNetwork network, vector<float> deviations)
+{
+    assert(mParameters.mutationProb <= 1.0f && mParameters.mutationProb >= 0.0f);
 
     boost::mt19937 mutation(rand());
     boost::uniform_real<float> mutationProbDist(0, 1);
@@ -118,6 +186,7 @@ NeuralNetwork NeuralNetwork::mutate(NeuralNetwork network, vector<float> deviati
         if(genMutationProb() <= mParameters.mutationProb)
             weights[k] += genMutation();
     }
+
     network.setWeights(weights);
 
     return network;
@@ -131,21 +200,15 @@ NeuralNetwork GA::train(unsigned int& initializationSeed, vector2 goal)
     vector<NeuralNetwork> population = initializePopulation();
     assert(population.size() > 0);
 
-    vector<Object*> objects = initializeModels(initializationSeed);
-    assert(objects.size() > 0);
+    cout << "Starting training: " << endl;
 
     for(unsigned int k = 0; k < mParameters.maxGenerations; k++)
     {
-        for(unsigned int i = 0; i < mParameters.GApopulation; i++)
-        {
-            float fitness = sim.run(mParameters.simulationCycles, population[i], objects, goal);
-            population[i].setFitness(fitness);
-            if(fitness == 0.0f)
-            {
-                cleanupModels(objects);
-                return population[i];
-            }
-        }
+        cout << "Generation " << k << endl;
+        evaluatePopulation(population, goal, initializationSeed);
+
+        if(population[0].getFitness() < mParameters.epsilon)
+            return population[0];
 
         vector<NeuralNetwork> newPopulation = getBest(population, mParameters.elitismCount);
         while(newPopulation.size() < population.size())
@@ -153,27 +216,31 @@ NeuralNetwork GA::train(unsigned int& initializationSeed, vector2 goal)
 
         population = newPopulation;
         
+        vector<vector<float>> deviationMatrix;
+
         for(int i = 0; i < population.size(); i++)
         {
             vector<float> deviations;
 
             for(int l = 0; l < population[i].getWeights().size(); l++)
-                deviations.push_back(calculateStandardDeviation(population, population[i], l);
+                deviations.push_back(calculateStandardDeviation(population, population[i], l));
 
-            population[i] = mutate(population[i], deviations);
+            deviationMatrix.push_back(deviations);
         }
+
+        for(int i = 0; i < deviationMatrix.size(); i++)
+            population[i] = mutate(population[i], deviationMatrix[i]);
+
+        conformWeights(population);
     }
+    evaluatePopulation(population, goal, initializationSeed);
 
-    cleanupModels(objects);
-
-    return getBest(population, 1)[0];
+    return population[0];
 }
 
 vector<NeuralNetwork> GA::getBest(vector<NeuralNetwork> population, unsigned int amount)
 {
     vector<NeuralNetwork> output;
-
-    quicksort(population);
 
     unsigned int stop = (amount > population.size()) ? population.size() : amount;
     for(int k = 0; k < stop; k++)
@@ -187,12 +254,12 @@ void GA::quicksort(vector<NeuralNetwork>& elements, int left, int right)
 	int i = left;
 	int j = right;
 
-	NeuralNetwork pivot = particles[(left+ right) / 2];
+	NeuralNetwork pivot = elements[(left+ right) / 2];
 	do
 	{
-		while (elements[i]->getFitness() > pivot->getFitness())
+		while (elements[i].getFitness() < pivot.getFitness())
 			i++;
-		while (elements[j]->getFitness() < pivot->getFitness())
+		while (elements[j].getFitness() > pivot.getFitness())
 			j--;
 
 		if (i <= j)
@@ -206,4 +273,28 @@ void GA::quicksort(vector<NeuralNetwork>& elements, int left, int right)
 		quicksort(elements, left, j);
 	if (i < right)
 		quicksort(elements, i, right);
+}
+
+void GA::evaluatePopulation(vector<NeuralNetwork>& population, vector2 goal, unsigned int initializationSeed)
+{
+    for(unsigned int i = 0; i < mParameters.GApopulation; i++)
+    {
+        vector<Object*> objects = initializeModels(initializationSeed);
+        assert(objects.size() > 0);
+
+        float fitness = sim.run(mParameters.simulationCycles, population[i], objects, goal);
+        cout << "Chromosome: " << i << " with fitness: " << fitness << endl;
+        population[i].setFitness(fitness);
+        if(fitness == 0.0f)
+            break;
+
+        cout << "Weights: ";
+        for(int k =0 ; k < population[i].getWeights().size(); k++)
+            cout << population[i].getWeights()[k] << " ";
+        cout << endl;
+
+        cleanupModels(objects);
+    }
+
+    quicksort(population, 0, population.size() - 1);
 }

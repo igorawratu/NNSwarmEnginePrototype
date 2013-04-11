@@ -4,6 +4,7 @@
 #include <vector>
 #include <time.h>
 #include <math.h>
+#include <omp.h>
 
 #include "boost/random.hpp"
 #include "boost/generator_iterator.hpp"
@@ -38,6 +39,7 @@ struct GAParams
     float maxFitness;
     unsigned int elitismCount;
     float mutationProb;
+    float epsilon;
 };
 
 
@@ -63,6 +65,9 @@ private:
     NeuralNetwork mutate(NeuralNetwork net, vector<float> deviations);
     void quicksort(vector<NeuralNetwork>& elements, int left, int right);
     float calculateStandardDeviation(vector<NeuralNetwork> population, NeuralNetwork current, unsigned int position);
+    NeuralNetwork selectParent(vector<NeuralNetwork> population, unsigned int& rank);
+    void conformWeights(vector<NeuralNetwork>& population);
+    void evaluatePopulation(vector<NeuralNetwork>& population, vector2 goal, unsigned int initializationSeed);
 
 private:
     GAParams mParameters;

@@ -17,8 +17,8 @@
 
 using namespace std;
 
-const unsigned int WIDTH = 1600;
-const unsigned int HEIGHT = 900;
+//const unsigned int WIDTH = 1600;
+//const unsigned int HEIGHT = 900;
 const unsigned int BITDEPTH = 32;
 
 GLuint shadername;
@@ -231,14 +231,14 @@ int main(int argc, char* args[])
     col.g = col.b = 0.0f;
     col.r = col.a = 1.0f;
     
-    parameters.GApopulation = 1;
-    parameters.simulationPopulation = 50;
-    parameters.searchSpaceMax = 5.0f;
-    parameters.searchSpaceMin = -5.0f;
-    parameters.maxGenerations = 1;
-    parameters.simulationCycles = 2000;
+    parameters.GApopulation = 50;
+    parameters.simulationPopulation = 20;
+    parameters.searchSpaceMax = 15.0f;
+    parameters.searchSpaceMin = -15.0f;
+    parameters.maxGenerations = 50;
+    parameters.simulationCycles = 1000;
     parameters.nnInputs = 4;
-    parameters.nnHiddens = 0;
+    parameters.nnHiddens = 4;
     parameters.nnOutputs = 2;
     parameters.modelMoveSpaceMin = mmsMin;
     parameters.modelMoveSpaceMax = mmsMax;
@@ -247,9 +247,10 @@ int main(int argc, char* args[])
     parameters.vMax = vMax;
     parameters.vMin = vMin;
     parameters.modelColour = col;
-    parameters.maxFitness = 50.0f;
+    parameters.maxFitness = 20.0f;
     parameters.elitismCount = 5;
     parameters.mutationProb = 0.02f;
+    parameters.epsilon = 0.25f;
         
     GA ga(parameters);
 
@@ -261,6 +262,11 @@ int main(int argc, char* args[])
     NeuralNetwork brain = ga.train(seed, goal);
 
     cout << "FITNESS: " << brain.getFitness() << endl;
+
+    int x;
+
+    cout << "finished training" << endl;
+    cin >> x;
 
     initialize(seed, parameters);
     bool run = true;
