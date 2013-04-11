@@ -238,7 +238,7 @@ int main(int argc, char* args[])
     parameters.maxGenerations = 50;
     parameters.simulationCycles = 1000;
     parameters.nnInputs = 4;
-    parameters.nnHiddens = 4;
+    parameters.nnHiddens = 0;
     parameters.nnOutputs = 2;
     parameters.modelMoveSpaceMin = mmsMin;
     parameters.modelMoveSpaceMax = mmsMax;
