@@ -117,5 +117,5 @@ float NeuralNetwork::activationFunc(vector<float> inputs, vector<float> weightVe
         powerVal += weightVec[k] * inputs[k];
     powerVal += -1 * weightVec[weightVec.size() - 1];
 
-    return 1/(1 + pow(e, 0.002 * powerVal));
+    return 1/(1 + pow(e, powerVal));
 }

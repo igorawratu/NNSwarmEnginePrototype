@@ -16,6 +16,8 @@
 
 using namespace std;
 
+enum Crossover{GAUSSIAN_CO, MULTIPOINT_CO, SIMPLEX_CO, SINGLEPOINT_CO, TWOPOINT_CO, SIMULATEDBINARY_CO};
+
 struct GAParams
 {
     GAParams() : GApopulation(0), simulationPopulation(0), searchSpaceMax(1.0f), searchSpaceMin(-1.0f), maxGenerations(1), simulationCycles(1), 
@@ -40,6 +42,8 @@ struct GAParams
     unsigned int elitismCount;
     float mutationProb;
     float epsilon;
+    Crossover crossoverType;
+
 };
 
 
@@ -55,19 +59,39 @@ public:
     void setParameters(GAParams parameters){mParameters = parameters;};
 
 private:
+    /* INIT AND CLEANUP */
+    vector<Object*> initializeModels(unsigned int initializationSeed);
+    vector<NeuralNetwork> initializePopulation();
+    void cleanupModels(vector<Object*> models);
+
+    /* MUTATION */
+    void mutate(vector<NeuralNetwork>& population);
+    
+    /* CROSSOVER RELATED FUNCTIONS */
+    vector<NeuralNetwork> crossover(vector<NeuralNetwork> population);
+
+    //crossover helper
+    vector<NeuralNetwork> getParents(vector<NeuralNetwork> population, unsigned int numParents);
+    NeuralNetwork selectParent(vector<NeuralNetwork> population, unsigned int& rank);
+
+    //crossover types
+    vector<NeuralNetwork> gaussianCrossover(vector<NeuralNetwork> population);
+    vector<NeuralNetwork> multipointCrossover(vector<NeuralNetwork> population);
+    vector<NeuralNetwork> simplexCrossover(vector<NeuralNetwork> population);
+    vector<NeuralNetwork> simulatedbinaryCrossover(vector<NeuralNetwork> population);
+    vector<NeuralNetwork> singlepointCrossover(vector<NeuralNetwork> population);
+    vector<NeuralNetwork> twopointCrossover(vector<NeuralNetwork> population);
+
+    /* MISC */
+
     GA(){}
     unsigned int getNumWeights(unsigned int numInput, unsigned int numHidden, unsigned int numOutput);
-    vector<Object*> initializeModels(unsigned int initializationSeed);
-    void cleanupModels(vector<Object*> models);
-    vector<NeuralNetwork> initializePopulation();
     vector<NeuralNetwork> getBest(vector<NeuralNetwork> population, unsigned int amount);
-    NeuralNetwork crossover(vector<NeuralNetwork> population);
-    NeuralNetwork mutate(NeuralNetwork net, vector<float> deviations);
     void quicksort(vector<NeuralNetwork>& elements, int left, int right);
     float calculateStandardDeviation(vector<NeuralNetwork> population, NeuralNetwork current, unsigned int position);
-    NeuralNetwork selectParent(vector<NeuralNetwork> population, unsigned int& rank);
     void conformWeights(vector<NeuralNetwork>& population);
     void evaluatePopulation(vector<NeuralNetwork>& population, vector2 goal, unsigned int initializationSeed);
+
 
 private:
     GAParams mParameters;

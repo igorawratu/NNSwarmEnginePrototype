@@ -12,9 +12,9 @@
 
 using namespace std;
 
-const float EPSILON = 100.0f;
-const float MAXDISTANCESQUARED = 2250000.0f;
+const float EPSILON = 5.0f;
 const unsigned int WIDTH = 1600;
+const float MAXDISTANCE= (float)WIDTH * 2;
 const unsigned int HEIGHT = 900;
 
 class Simulation

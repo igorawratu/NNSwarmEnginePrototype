@@ -28,8 +28,8 @@ void Simulation::iterate(vector<Object*>& objects, NeuralNetwork brain, vector2 
 		assert(status);
 
 		vector2 acceleration;
-		acceleration.x = 2 * ((output[0] - 0.5f)) / 5;
-		acceleration.y = 2 * ((output[1] - 0.5f)) / 5;
+		acceleration.x = (output[0] - 0.5f) / 5;
+		acceleration.y = (output[1] - 0.5f) / 5;
 
 		objects[k]->changeVelocity(acceleration);
 
@@ -43,7 +43,7 @@ float Simulation::run(unsigned int cycles, NeuralNetwork brain, vector<Object*> 
 	for(unsigned int k = 0; k < cycles; k++)
 	{
 		for(unsigned int i = 0; i < objects.size(); i++)
-			if(calcDistanceSquared(objects[i]->getPosition(), goal) < EPSILON)
+			if(sqrt(calcDistanceSquared(objects[i]->getPosition(), goal)) < EPSILON)
 				objects[i]->setReached(true);
 		iterate(objects, brain, goal);
 	}
@@ -55,8 +55,8 @@ float Simulation::run(unsigned int cycles, NeuralNetwork brain, vector<Object*> 
 			negationAmount = 1.0f;
 		else
 		{
-			float distanceSquared = calcDistanceSquared(objects[k]->getPosition(), goal);
-			negationAmount = (distanceSquared < MAXDISTANCESQUARED) ? 1.0f - (distanceSquared/MAXDISTANCESQUARED) : 0.0f;	
+			float distance = sqrt(calcDistanceSquared(objects[k]->getPosition(), goal));
+			negationAmount = (distance < MAXDISTANCE) ? 1.0f - (distance/MAXDISTANCE) : 0.0f;	
 		}
 
 		finalFitness -= negationAmount;

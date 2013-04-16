@@ -103,24 +103,36 @@ NeuralNetwork GA::selectParent(vector<NeuralNetwork> population, unsigned int& r
     return population[k];
 }
 
-NeuralNetwork GA::crossover(vector<NeuralNetwork> population)
+vector<NeuralNetwork> GA::getParents(vector<NeuralNetwork> population, unsigned int numParents)
 {
-    unsigned int p1rank;
-    NeuralNetwork parent1 = selectParent(population, p1rank);
-    unsigned int p2rank = p1rank;
+    assert(numParents <= population.size());
+    vector<NeuralNetwork> parents;
 
-    NeuralNetwork parent2(mParameters.nnInputs, mParameters.nnOutputs, mParameters.nnHiddens);
-    while(p2rank == p1rank)
-        parent2 = selectParent(population, p2rank);
+    while(parents.size() < numParents)
+    {
+        unsigned int rank;
+        parents.push_back(selectParent(population, rank));
+        population.erase(population.begin() + rank);
+    }
+    assert(parents.size() == numParents);
+    return parents;
+}
+
+vector<NeuralNetwork> GA::gaussianCrossover(vector<NeuralNetwork> population)
+{
+    vector<NeuralNetwork> output;
+
+    vector<NeuralNetwork> parents = getParents(population, 2);
+
     NeuralNetwork child(mParameters.nnInputs, mParameters.nnOutputs, mParameters.nnHiddens);
     
-    boost::mt19937 mutation(rand());
+    boost::mt19937 rng(rand());
     
     vector<float> weights;
-    for(int k = 0; k < parent1.getWeights().size(); k++)
+    for(int k = 0; k < parents[0].getWeights().size(); k++)
     {
-        boost::normal_distribution<> normDist((parent1.getWeights()[k] + parent2.getWeights()[k]) / 2 , fabs(parent1.getWeights()[k] - parent2.getWeights()[k]));
-	    boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > genCrossover(mutation, normDist);
+        boost::normal_distribution<> normDist((parents[0].getWeights()[k] + parents[1].getWeights()[k]) / 2 , fabs(parents[0].getWeights()[k] - parents[1].getWeights()[k]));
+	    boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > genCrossover(rng, normDist);
         
         float val = genCrossover();
         weights.push_back(val);
@@ -129,7 +141,179 @@ NeuralNetwork GA::crossover(vector<NeuralNetwork> population)
     child.setWeights(weights);
     child.setFitness(mParameters.maxFitness);
 
-    return child;
+    output.push_back(child);
+    return output;
+}
+
+vector<NeuralNetwork> GA::multipointCrossover(vector<NeuralNetwork> population)
+{
+    vector<NeuralNetwork> output;
+
+    vector<NeuralNetwork> parents = getParents(population, 2);
+
+    NeuralNetwork child(mParameters.nnInputs, mParameters.nnOutputs, mParameters.nnHiddens);
+    
+    boost::mt19937 rng(rand());
+    
+    vector<float> weights;
+    for(int k = 0; k < parents[0].getWeights().size(); k++)
+    {
+        boost::uniform_int<> multipointDist(0, 1);
+	    boost::variate_generator<boost::mt19937&, boost::uniform_int<> > genCrossover(rng, multipointDist);
+
+        weights.push_back(genCrossover() == 0? parents[0].getWeights()[k] : parents[1].getWeights()[k]);
+    }
+
+    child.setWeights(weights);
+    child.setFitness(mParameters.maxFitness);
+
+    output.push_back(child);
+
+    return output;
+}
+
+vector<NeuralNetwork> GA::simplexCrossover(vector<NeuralNetwork> population)
+{
+    vector<NeuralNetwork> output;
+    vector<NeuralNetwork> parents = getParents(population, 4);
+
+    NeuralNetwork child(mParameters.nnInputs, mParameters.nnOutputs, mParameters.nnHiddens);
+
+    quicksort(parents, 0, parents.size() - 1);
+    vector<float> com;
+    vector<float> childWeights;
+    for(int k = 0; k < parents[0].getWeights().size(); k++)
+    {
+        com.push_back(0.0f);
+        for(int i = 0; i < parents.size() - 1; i++)
+            com[k] += parents[i].getWeights()[k];
+
+        com[k] /= (parents.size() - 1);
+        childWeights.push_back(com[k] + (parents[0].getWeights()[k] - parents[parents.size() - 1].getWeights()[k]));
+    }
+    
+    child.setWeights(childWeights);
+    child.setFitness(mParameters.maxFitness);
+
+    output.push_back(child);
+    return output;
+}
+
+vector<NeuralNetwork> GA::singlepointCrossover(vector<NeuralNetwork> population)
+{
+    vector<NeuralNetwork> output;
+
+    vector<NeuralNetwork> parents = getParents(population, 2);
+
+    NeuralNetwork child(mParameters.nnInputs, mParameters.nnOutputs, mParameters.nnHiddens);
+    
+    vector<float> weights, p1, p2;
+    unsigned int pos = rand() % parents[0].getWeights().size();
+
+    p1 = parents[0].getWeights();
+    p2 = parents[1].getWeights();
+
+    weights.insert(weights.end(), p1.begin(), p1.begin() + pos);
+    weights.insert(weights.end(), p2.begin() + pos, p2.end());
+
+    assert(weights.size() == parents[0].getWeights().size());
+
+    child.setWeights(weights);
+    child.setFitness(mParameters.maxFitness);
+
+    output.push_back(child);
+
+    return output;
+}
+
+vector<NeuralNetwork> GA::twopointCrossover(vector<NeuralNetwork> population)
+{
+    vector<NeuralNetwork> output;
+
+    vector<NeuralNetwork> parents = getParents(population, 2);
+
+    NeuralNetwork child(mParameters.nnInputs, mParameters.nnOutputs, mParameters.nnHiddens);
+    
+    vector<float> weights, p1, p2;
+    unsigned int pos1 = rand() % parents[0].getWeights().size();
+    unsigned int pos2 = (rand() % (parents[0].getWeights().size() - pos1)) + pos1;
+
+    p1 = parents[0].getWeights();
+    p2 = parents[1].getWeights();
+
+    weights.insert(weights.end(), p1.begin(), p1.begin() + pos1);
+    weights.insert(weights.end(), p2.begin() + pos1, p2.begin() + pos2);
+    weights.insert(weights.end(), p2.begin() + pos2, p2.end());
+
+    assert(weights.size() == parents[0].getWeights().size());
+
+    child.setWeights(weights);
+    child.setFitness(mParameters.maxFitness);
+
+    output.push_back(child);
+
+    return output;
+}
+
+vector<NeuralNetwork> GA::simulatedbinaryCrossover(vector<NeuralNetwork> population)
+{
+    vector<NeuralNetwork> output;
+    
+    vector<NeuralNetwork> parents = getParents(population, 2);
+    NeuralNetwork child1(mParameters.nnInputs, mParameters.nnOutputs, mParameters.nnHiddens); child1.setFitness(mParameters.maxFitness);
+    NeuralNetwork child2(mParameters.nnInputs, mParameters.nnOutputs, mParameters.nnHiddens); child2.setFitness(mParameters.maxFitness);
+    vector<float> weights1, weights2;
+
+    boost::mt19937 rng(rand());
+    boost::uniform_real<float> unidist(0, 1);
+	boost::variate_generator<boost::mt19937&, boost::uniform_real<float> > genCrossover(rng, unidist);
+
+    for(int k = 0; k < parents[0].getWeights().size(); k++)
+    {
+        float random = genCrossover();
+        float offset = random > 0.5f? pow(2 * random, 0.5f) : pow(1 / (2 * (1-random)), 0.5f);
+
+        weights1.push_back(((1 + offset) * parents[0].getWeights()[k] + (1 - offset) * parents[1].getWeights()[k])/2);
+        weights2.push_back(((1 - offset) * parents[0].getWeights()[k] + (1 + offset) * parents[1].getWeights()[k])/2);
+    }
+        
+    child1.setWeights(weights1);
+    child2.setWeights(weights2);
+
+    output.push_back(child1);
+    output.push_back(child2);
+    return output;
+}
+
+vector<NeuralNetwork> GA::crossover(vector<NeuralNetwork> population)
+{
+    vector<NeuralNetwork> output;
+
+    switch (mParameters.crossoverType)
+    {
+        case GAUSSIAN_CO: 
+            output = gaussianCrossover(population);
+            break;
+        case MULTIPOINT_CO: 
+            output = multipointCrossover(population);
+            break;
+        case SIMPLEX_CO:
+            output = simplexCrossover(population);
+            break;
+        case SINGLEPOINT_CO:
+            output = singlepointCrossover(population);
+            break;
+        case TWOPOINT_CO:
+            output = twopointCrossover(population);
+            break;
+        case SIMULATEDBINARY_CO:
+            output = simulatedbinaryCrossover(population);
+            break;
+        default:
+            break;
+    }
+
+    return output;
 }
 
 float GA::calculateStandardDeviation(vector<NeuralNetwork> population, NeuralNetwork current, unsigned int position)
@@ -169,27 +353,24 @@ void GA::conformWeights(vector<NeuralNetwork>& population)
     }
 }
 
-NeuralNetwork GA::mutate(NeuralNetwork network, vector<float> deviations)
+void GA::mutate(vector<NeuralNetwork>& population)
 {
     assert(mParameters.mutationProb <= 1.0f && mParameters.mutationProb >= 0.0f);
 
     boost::mt19937 mutation(rand());
+
     boost::uniform_real<float> mutationProbDist(0, 1);
     boost::variate_generator<boost::mt19937, boost::uniform_real<float>> genMutationProb(mutation, mutationProbDist);
 
-    vector<float> weights = network.getWeights();
-    for(int k = 0; k < weights.size(); k++)
-    {
-        boost::normal_distribution<> normDist(0, deviations[k]);
-	    boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > genMutation(mutation, normDist);
+    float standardDeviation = (mParameters.searchSpaceMax - mParameters.searchSpaceMin) / 5;
+    boost::normal_distribution<> normDist(0, standardDeviation);
+	boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > genMutation(mutation, normDist);
 
-        if(genMutationProb() <= mParameters.mutationProb)
-            weights[k] += genMutation();
-    }
-
-    network.setWeights(weights);
-
-    return network;
+    
+    for(int i = 0; i < population.size(); i++)
+        for(int k = 0; k < population[i].getWeights().size(); k++)
+            if(genMutationProb() <= mParameters.mutationProb)
+                population[i].getWeights()[k] += genMutation();
 }
 
 NeuralNetwork GA::train(unsigned int& initializationSeed, vector2 goal)
@@ -212,24 +393,17 @@ NeuralNetwork GA::train(unsigned int& initializationSeed, vector2 goal)
 
         vector<NeuralNetwork> newPopulation = getBest(population, mParameters.elitismCount);
         while(newPopulation.size() < population.size())
-            newPopulation.push_back(crossover(population));
-
-        population = newPopulation;
-        
-        vector<vector<float>> deviationMatrix;
-
-        for(int i = 0; i < population.size(); i++)
         {
-            vector<float> deviations;
-
-            for(int l = 0; l < population[i].getWeights().size(); l++)
-                deviations.push_back(calculateStandardDeviation(population, population[i], l));
-
-            deviationMatrix.push_back(deviations);
+            vector<NeuralNetwork> offspring = crossover(population);
+            newPopulation.insert(newPopulation.end(), offspring.begin(), offspring.end());
         }
 
-        for(int i = 0; i < deviationMatrix.size(); i++)
-            population[i] = mutate(population[i], deviationMatrix[i]);
+        while(newPopulation.size() > population.size())
+            newPopulation.pop_back();
+
+        population = newPopulation;
+
+        mutate(population);
 
         conformWeights(population);
     }

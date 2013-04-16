@@ -215,26 +215,25 @@ void shutdown()
     SDL_Quit();
 }
 
-int main(int argc, char* args[]) 
+void getScenarioTwo(vector2& goal, GAParams& parameters)
 {
-    srand(time(0));
-    GAParams parameters;
     vector2 vMax, vMin, mmsMin, mmsMax, misMin, misMax;
     vector4 col;
 
-    vMax.x = vMax.y = 2.0f; 
-    vMin.x = vMin.y = -2.0f;
+    vMax.x = vMax.y = 3.0f; 
+    vMin.x = vMin.y = -3.0f;
     mmsMax.x = (float)WIDTH;
     mmsMax.y = (float)HEIGHT;
-    misMax.x = (float)WIDTH/2;
-    misMax.y = (float)HEIGHT;
+    misMax.x = 50.0f; misMax.y = (float)HEIGHT;
+    misMin.x = 49.9f; misMin.y = 0.0f;
+    
     col.g = col.b = 0.0f;
     col.r = col.a = 1.0f;
     
     parameters.GApopulation = 50;
     parameters.simulationPopulation = 20;
-    parameters.searchSpaceMax = 15.0f;
-    parameters.searchSpaceMin = -15.0f;
+    parameters.searchSpaceMax = 1.0f;
+    parameters.searchSpaceMin = -1.0f;
     parameters.maxGenerations = 50;
     parameters.simulationCycles = 1000;
     parameters.nnInputs = 4;
@@ -247,27 +246,77 @@ int main(int argc, char* args[])
     parameters.vMax = vMax;
     parameters.vMin = vMin;
     parameters.modelColour = col;
-    parameters.maxFitness = 20.0f;
-    parameters.elitismCount = 5;
-    parameters.mutationProb = 0.02f;
-    parameters.epsilon = 0.25f;
-        
-    GA ga(parameters);
-
+    parameters.maxFitness = (float)parameters.simulationPopulation;
+    parameters.elitismCount = parameters.GApopulation/10;
+    parameters.mutationProb = 0.1f;
+    parameters.epsilon = 0.5f;
+    parameters.crossoverType = SIMPLEX_CO;
     goal.x = (float)WIDTH - 10.0f;
     goal.y = (float)HEIGHT/2;
+}
+
+void getScenarioOne(vector2& goal, GAParams& parameters)
+{
+    vector2 vMax, vMin, mmsMin, mmsMax, misMin, misMax;
+    vector4 col;
+
+    vMax.x = vMax.y = 2.0f; 
+    vMin.x = vMin.y = -2.0f;
+    mmsMax.x = (float)WIDTH;
+    mmsMax.y = (float)HEIGHT;
+    misMax.x = (float)WIDTH/2.0f; misMax.y = (float)HEIGHT;
+    misMin.x = 0.0f; misMin.y = 0.0f;
+    
+    col.g = col.b = 0.0f;
+    col.r = col.a = 1.0f;
+    
+    parameters.GApopulation = 20;
+    parameters.simulationPopulation = 20;
+    parameters.searchSpaceMax = 1.0f;
+    parameters.searchSpaceMin = -1.0f;
+    parameters.maxGenerations = 20;
+    parameters.simulationCycles = 1000;
+    parameters.nnInputs = 4;
+    parameters.nnHiddens = 0;
+    parameters.nnOutputs = 2;
+    parameters.modelMoveSpaceMin = mmsMin;
+    parameters.modelMoveSpaceMax = mmsMax;
+    parameters.modelInitSpaceMin = misMin;
+    parameters.modelInitSpaceMax = misMax;
+    parameters.vMax = vMax;
+    parameters.vMin = vMin;
+    parameters.modelColour = col;
+    parameters.maxFitness = (float)parameters.simulationPopulation;
+    parameters.elitismCount = 2;
+    parameters.mutationProb = 0.02f;
+    parameters.epsilon = 0.5f;
+    parameters.crossoverType = GAUSSIAN_CO;
+    goal.x = (float)WIDTH - 10.0f;
+    goal.y = (float)HEIGHT/2;
+}
+
+int main(int argc, char* args[]) 
+{
+    srand(time(0));
+
+    //TRAIN
+    GAParams parameters;
+
+    getScenarioTwo(goal, parameters);
+    
 
     unsigned int seed, counter = 0;
-
+        
+    GA ga(parameters);
     NeuralNetwork brain = ga.train(seed, goal);
 
     cout << "FITNESS: " << brain.getFitness() << endl;
 
     int x;
-
     cout << "finished training" << endl;
     cin >> x;
 
+    //RUN
     initialize(seed, parameters);
     bool run = true;
 
