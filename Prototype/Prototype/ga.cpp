@@ -154,15 +154,12 @@ vector<NeuralNetwork> GA::multipointCrossover(vector<NeuralNetwork> population)
     NeuralNetwork child(mParameters.nnInputs, mParameters.nnOutputs, mParameters.nnHiddens);
     
     boost::mt19937 rng(rand());
+    boost::uniform_int<> multipointDist(0, 1);
+    boost::variate_generator<boost::mt19937&, boost::uniform_int<> > genCrossover(rng, multipointDist);
     
     vector<float> weights;
     for(int k = 0; k < parents[0].getWeights().size(); k++)
-    {
-        boost::uniform_int<> multipointDist(0, 1);
-	    boost::variate_generator<boost::mt19937&, boost::uniform_int<> > genCrossover(rng, multipointDist);
-
         weights.push_back(genCrossover() == 0? parents[0].getWeights()[k] : parents[1].getWeights()[k]);
-    }
 
     child.setWeights(weights);
     child.setFitness(mParameters.maxFitness);
@@ -362,15 +359,23 @@ void GA::mutate(vector<NeuralNetwork>& population)
     boost::uniform_real<float> mutationProbDist(0, 1);
     boost::variate_generator<boost::mt19937, boost::uniform_real<float>> genMutationProb(mutation, mutationProbDist);
 
-    float standardDeviation = (mParameters.searchSpaceMax - mParameters.searchSpaceMin) / 5;
+    float standardDeviation = (mParameters.searchSpaceMax - mParameters.searchSpaceMin) / 10;
     boost::normal_distribution<> normDist(0, standardDeviation);
 	boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > genMutation(mutation, normDist);
 
     
-    for(int i = 0; i < population.size(); i++)
+    for(int i = mParameters.elitismCount; i < population.size(); i++)
+    {
         for(int k = 0; k < population[i].getWeights().size(); k++)
+        {
             if(genMutationProb() <= mParameters.mutationProb)
-                population[i].getWeights()[k] += genMutation();
+            {   
+                vector<float> weights = population[i].getWeights();
+                weights[k] += genMutation();
+                population[i].setWeights(weights);
+            }
+        }
+    }
 }
 
 NeuralNetwork GA::train(unsigned int& initializationSeed, vector2 goal)

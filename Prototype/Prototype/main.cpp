@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <time.h>
+#include <fstream>
 
 #include "gl/glew.h"
 #include "SDL.h"
@@ -234,10 +235,10 @@ void getScenarioTwo(vector2& goal, GAParams& parameters)
     parameters.simulationPopulation = 20;
     parameters.searchSpaceMax = 1.0f;
     parameters.searchSpaceMin = -1.0f;
-    parameters.maxGenerations = 50;
+    parameters.maxGenerations = 100;
     parameters.simulationCycles = 1000;
     parameters.nnInputs = 4;
-    parameters.nnHiddens = 0;
+    parameters.nnHiddens = 5;
     parameters.nnOutputs = 2;
     parameters.modelMoveSpaceMin = mmsMin;
     parameters.modelMoveSpaceMax = mmsMax;
@@ -248,9 +249,9 @@ void getScenarioTwo(vector2& goal, GAParams& parameters)
     parameters.modelColour = col;
     parameters.maxFitness = (float)parameters.simulationPopulation;
     parameters.elitismCount = parameters.GApopulation/10;
-    parameters.mutationProb = 0.1f;
+    parameters.mutationProb = 0.05f;
     parameters.epsilon = 0.5f;
-    parameters.crossoverType = SIMPLEX_CO;
+    parameters.crossoverType = MULTIPOINT_CO;
     goal.x = (float)WIDTH - 10.0f;
     goal.y = (float)HEIGHT/2;
 }
@@ -270,14 +271,14 @@ void getScenarioOne(vector2& goal, GAParams& parameters)
     col.g = col.b = 0.0f;
     col.r = col.a = 1.0f;
     
-    parameters.GApopulation = 20;
+    parameters.GApopulation = 50;
     parameters.simulationPopulation = 20;
     parameters.searchSpaceMax = 1.0f;
     parameters.searchSpaceMin = -1.0f;
-    parameters.maxGenerations = 20;
+    parameters.maxGenerations = 50;
     parameters.simulationCycles = 1000;
     parameters.nnInputs = 4;
-    parameters.nnHiddens = 0;
+    parameters.nnHiddens = 5;
     parameters.nnOutputs = 2;
     parameters.modelMoveSpaceMin = mmsMin;
     parameters.modelMoveSpaceMax = mmsMax;
@@ -287,23 +288,36 @@ void getScenarioOne(vector2& goal, GAParams& parameters)
     parameters.vMin = vMin;
     parameters.modelColour = col;
     parameters.maxFitness = (float)parameters.simulationPopulation;
-    parameters.elitismCount = 2;
-    parameters.mutationProb = 0.02f;
+    parameters.elitismCount = parameters.GApopulation/10;
+    parameters.mutationProb = 0.05f;
     parameters.epsilon = 0.5f;
-    parameters.crossoverType = GAUSSIAN_CO;
+    parameters.crossoverType = MULTIPOINT_CO;
     goal.x = (float)WIDTH - 10.0f;
     goal.y = (float)HEIGHT/2;
 }
 
+void writeToFile(char* filename, NeuralNetwork nn, unsigned int seed)
+{
+    ofstream os;
+    os.open(filename);
+
+    os << "seed: " << seed << endl;
+    os << "fitness: " << nn.getFitness() << endl;
+    for(int k = 0; k < nn.getWeights().size(); k++)
+        os << nn.getWeights()[k] << " ";
+    os << endl;
+
+    os.close();
+}
+
 int main(int argc, char* args[]) 
 {
-    srand(time(0));
+    /*srand(time(0));
 
     //TRAIN
     GAParams parameters;
 
-    getScenarioTwo(goal, parameters);
-    
+    getScenarioOne(goal, parameters);
 
     unsigned int seed, counter = 0;
         
@@ -312,13 +326,108 @@ int main(int argc, char* args[])
 
     cout << "FITNESS: " << brain.getFitness() << endl;
 
-    int x;
+    writeToFile("random_multipoint_5.txt", brain, seed);
+
+    
     cout << "finished training" << endl;
-    cin >> x;
+    int x; cin >> x;*/
 
     //RUN
+    GAParams parameters;
+    getScenarioTwo(goal, parameters);
+    
+    
+
+
+    //fixed starting pos, broken mutation, 0 hidden, 0.492689 fitness
+    
+    unsigned int seed = 1366186904;
+    NeuralNetwork brain(4, 2, 0);
+    static const float arr[] = {0.820145, 0.169595, -0.420525, 0.917414, 0.112781, -0.635511, 0.390111, 0.953923, 0.886033, -0.111409};
+
+
+
+
+
+
+    //fixed starting pos, broken mutation, 5 hidden, 0.679159 fitness
+    /*unsigned int seed = 1366187757;
+    NeuralNetwork brain(4, 2, 5);
+    static const float arr[] = {-0.962675, 0.588216, 0.49828, -0.0297721, -0.0875987,
+        -0.139209, -0.89658, 0.841324, 0.416497, 0.0187634, -0.315081, -0.351639, -0.493444,
+        -0.542943, -0.364325, -0.73212, 0.835666, 0.127941, 0.0145293, 0.47307, -0.7409,
+        -0.66698, 0.010776, -0.320704, 0.116337, -0.471666, 0.346973, -0.330152, 0.722695,
+        0.865675, 0.618766, -0.81991, 0.770683, 0.458277, -0.928521, 0.926467, -0.0196038};*/
+    
+
+
+
+
+    //fixed starting pos, 3 hidden, 0.4282 fitness
+    
+    /*unsigned int seed = 1366197956;
+    NeuralNetwork brain(4, 2, 3);
+    static const float arr[] = {-0.00341332, 0.901713, -0.973966, -0.461915, 0.861362, 0.588173, 0.609768,
+        -0.885908, 0.543338, -0.021608, -0.857131, -0.544013, -0.0334977, -0.689121, -0.940414, -0.707547,
+        -0.630562, 0.609461, -0.287555, -0.821912, -0.407458, 0.838727, -0.277651};*/
+
+
+
+
+    //fixed starting pos, 0 hidden, 0.391756 fitness, bound
+    /*
+    unsigned int seed = 1366201929;
+    NeuralNetwork brain(4, 2, 0);
+    static const float arr[] = {-0.503379, 0.132398, -0.430728, 0.683958, 0.704276, 0.539303, 0.104466, 0.103953, -0.662985, 0.364969};*/
+
+
+
+
+    //fixed starting pos, 5 hidden, 0.18 fitness, bound
+    
+    /*unsigned int seed = 1366202228;
+    NeuralNetwork brain(4, 2, 5);
+    static const float arr[] = {-0.364195, -0.647887, -0.89466, 0.408244, -0.415702, 0.719333, 
+    -0.177986, 0.715218, -0.56539, -0.306142, 0.25556, -0.268706, 0.0852885, 0.605348, 0.423719, 
+    0.750521, -0.499322, 0.304426, 0.653066, -0.198795, 0.717026, -0.42312, -0.769437, 0.54964, 
+    -0.639983, -0.241765, -0.00169611, -0.693809, 0.68473, -0.573217, 0.990824, -0.344518, 0.303608, 
+    0.749428, 0.782001, 0.358236, 0.773391};*/
+
+
+
+    /*GAParams parameters;
+    getScenarioOne(goal, parameters);*/
+
+
+
+    //random starting pos, 0 hidden, 1.1081 fitness
+    /*
+    unsigned int seed = 1366205005;
+    NeuralNetwork brain(4, 2, 0);
+    static const float arr[] = {0.306409, 0.0228944, 0.230332, -0.429737, 0.405686, 0.183583, 0.392145, 0.195283, 0.803369, 0.572016};*/
+
+    //random starting pos,  hidden, 0.874406 fitness
+    /*
+    unsigned int seed = 1366208190;
+    NeuralNetwork brain(4, 2, 5);
+    static const float arr[] = {-0.908552, 0.435966, 0.89764, 0.857999, -0.515941, -0.922256, 0.852167, 0.88024, -0.281442, 
+    -0.0168102, 0.379159, -0.599959, 0.441494, 0.154943, -0.67363, -0.330456, -0.868506, 0.896452, 0.401422, -0.0199213, 0.944812, 
+    0.887258, -0.100087, 0.220059, -0.921285, 0.461758, -0.00183128, 0.0741204, 0.075393, -0.550676, -0.0316504, -0.268472, -0.748215, 
+    0.541304, 0.992816, -0.408214, -0.307868};*/
+
+
+    
+
+
+    
+    //test code
+    vector<float> weights(arr, arr + sizeof(arr)/sizeof(arr[0]));
+    brain.setWeights(weights);
+    unsigned int counter = 0;
     initialize(seed, parameters);
+
     bool run = true;
+    
 
     while(run)
         run = frame(brain, goal, counter++ >= parameters.simulationCycles);

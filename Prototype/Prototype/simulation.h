@@ -14,7 +14,7 @@ using namespace std;
 
 const float EPSILON = 5.0f;
 const unsigned int WIDTH = 1600;
-const float MAXDISTANCE= (float)WIDTH * 2;
+const float MAXDISTANCE= (float)WIDTH;
 const unsigned int HEIGHT = 900;
 
 class Simulation
