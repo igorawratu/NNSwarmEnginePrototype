@@ -426,8 +426,7 @@ vector<NeuralNetwork> GA::getBest(vector<NeuralNetwork> population, unsigned int
     vector<NeuralNetwork> output;
 
     unsigned int stop = (amount > population.size()) ? population.size() : amount;
-    for(int k = 0; k < stop; k++)
-        output.push_back(population[k]);
+    output.insert(output.end(), population.begin(), population.begin() + stop);
 
     return output;
 }
