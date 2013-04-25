@@ -55,7 +55,7 @@ public:
     GA& operator=(const GA& other);
     ~GA(){}
 
-    NeuralNetwork train(unsigned int& initializationSeed, vector2 goal);
+    NeuralNetwork train(unsigned int& initializationSeed, vector2 goal, unsigned int& generations);
     void setParameters(GAParams parameters){mParameters = parameters;};
 
 private:

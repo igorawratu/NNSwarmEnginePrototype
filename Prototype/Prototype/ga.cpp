@@ -378,7 +378,7 @@ void GA::mutate(vector<NeuralNetwork>& population)
     }
 }
 
-NeuralNetwork GA::train(unsigned int& initializationSeed, vector2 goal)
+NeuralNetwork GA::train(unsigned int& initializationSeed, vector2 goal, unsigned int& generations)
 {
     assert(mParameters.GApopulation > mParameters.elitismCount); 
 
@@ -394,7 +394,10 @@ NeuralNetwork GA::train(unsigned int& initializationSeed, vector2 goal)
         evaluatePopulation(population, goal, initializationSeed);
 
         if(population[0].getFitness() < mParameters.epsilon)
+        {
+            generations = k;
             return population[0];
+        }
 
         vector<NeuralNetwork> newPopulation = getBest(population, mParameters.elitismCount);
         while(newPopulation.size() < population.size())
@@ -414,6 +417,7 @@ NeuralNetwork GA::train(unsigned int& initializationSeed, vector2 goal)
     }
     evaluatePopulation(population, goal, initializationSeed);
 
+    generations = mParameters.maxGenerations;
     return population[0];
 }
 
@@ -464,15 +468,9 @@ void GA::evaluatePopulation(vector<NeuralNetwork>& population, vector2 goal, uns
         float fitness = sim.run(mParameters.simulationCycles, population[i], objects, goal);
         cout << "Chromosome: " << i << " with fitness: " << fitness << endl;
         population[i].setFitness(fitness);
-        if(fitness == 0.0f)
-            break;
-
-        cout << "Weights: ";
-        for(int k =0 ; k < population[i].getWeights().size(); k++)
-            cout << population[i].getWeights()[k] << " ";
-        cout << endl;
-
         cleanupModels(objects);
+        if(fitness < mParameters.epsilon)
+            break;
     }
 
     quicksort(population, 0, population.size() - 1);

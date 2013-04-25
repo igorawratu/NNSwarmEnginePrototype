@@ -25,11 +25,12 @@ public:
     Simulation(const Simulation& other){}
     Simulation& operator=(const Simulation& other){}
 
-    void iterate(vector<Object*>& objects, NeuralNetwork brain, vector2 goal);
+    void iterate(vector<Object*>& objects, NeuralNetwork brain, vector2 goal, bool makeDecision);
     float run(unsigned int cycles, NeuralNetwork brain, vector<Object*> objects, vector2 goal);
 
 private:
     float calcDistanceSquared(vector2 from, vector2 to);
+    vector<float> makeDecision(NeuralNetwork& brain, vector<float>& inputs);
 };
 
 #endif

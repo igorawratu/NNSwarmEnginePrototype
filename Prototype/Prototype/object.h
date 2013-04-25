@@ -31,6 +31,7 @@ public:
     vector2 getPosition(){return mPosition;}
     void setReached(bool reached){mReached = reached;}
     bool getReached(){return mReached;}
+    vector2 getVelocity(){return mVelocity;}
 
 private:
     void initBuffers();
