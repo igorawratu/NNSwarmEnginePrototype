@@ -225,8 +225,8 @@ void getParams(vector2& goal, GAParams& parameters)
     vMin.x = vMin.y = -2.0f;
     mmsMax.x = (float)WIDTH;
     mmsMax.y = (float)HEIGHT;
-    misMax.x = 10.0f; misMax.y = (float)HEIGHT;
-    misMin.x = 9.99f; misMin.y = 0.0f;
+    misMax.x = (float)WIDTH/2.0f; misMax.y = (float)HEIGHT;
+    misMin.x = 0.0f; misMin.y = 0.0f;
     
     col.g = col.b = 0.0f;
     col.r = col.a = 1.0f;
@@ -280,7 +280,7 @@ NeuralNetwork train(unsigned int& seed, GAParams& parameters)
     {
         parameters.nnHiddens = i;
         char outputFileName[30];
-        sprintf(outputFileName, "%dhidden_multipoint_fixed.txt", i);
+        sprintf(outputFileName, "%dhidden_multipoint_random.txt", i);
 
         for(int k = 0; k < 10; k++)
         {
@@ -300,7 +300,13 @@ int main(int argc, char* args[])
     unsigned int seed, counter = 0;;
 
 
-    NeuralNetwork brain = train(seed, parameters);
+    //NeuralNetwork brain = train(seed, parameters);
+    
+    getParams(goal, parameters);
+    seed = 0;
+    NeuralNetwork brain(4, 0, 2);
+
+
     initialize(seed, parameters);
 
     while(frame(brain, goal, counter++ >= parameters.simulationCycles, counter % 10 == 0));
