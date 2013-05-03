@@ -1,15 +1,10 @@
 #include "neuralnetwork.h"
 
-NeuralNetwork::NeuralNetwork(unsigned int numInputs, unsigned int numOutputs, unsigned int numHidden)
+NeuralNetwork::NeuralNetwork(NeuralNetworkParameter parameters)
 {
-    if(numHidden > 0)
-        mWeightCount = numHidden * (numInputs + numOutputs + 1) + numOutputs;
-    else mWeightCount = numOutputs * (numInputs + 1);
-
-    mInputCount = numInputs;
-    mOutputCount = numOutputs;
-    mHiddenCount = numHidden;
-    mFitness = 0;
+    if(mParameters.inputNodes > 0)
+        mWeightCount = mParameters.hiddenNodes * (mParameters.inputNodes + mParameters.outputNodes + 1) + mParameters.outputNodes;
+    else mWeightCount = mParameters.outputNodes * (mParameters.inputNodes + 1);
 
     for(int k = 0; k < mWeightCount; k++)
         mWeights.push_back(0);
@@ -17,50 +12,45 @@ NeuralNetwork::NeuralNetwork(unsigned int numInputs, unsigned int numOutputs, un
 
 NeuralNetwork::NeuralNetwork(const NeuralNetwork& other)
 {
-    mWeights = other.mWeights;
+    mParameters = other.mParameters;
     mWeightCount = other.mWeightCount;
-    mInputCount = other.mInputCount;
-    mOutputCount = other.mOutputCount;
-    mHiddenCount = other.mHiddenCount;
-    mFitness = other.mFitness;
-}
-
-NeuralNetwork::~NeuralNetwork()
-{
+    mWeights = other.mWeights;
 }
 
 NeuralNetwork& NeuralNetwork::operator=(const NeuralNetwork& other)
 {
-    mWeights = other.mWeights;
+    mParameters = other.mParameters;
     mWeightCount = other.mWeightCount;
-    mInputCount = other.mInputCount;
-    mOutputCount = other.mOutputCount;
-    mHiddenCount = other.mHiddenCount;
-    mFitness = other.mFitness;
+    mWeights = other.mWeights;
 
     return *this;
 }
 
 vector<float> NeuralNetwork::evaluate(vector<float> input, bool& status)
 {
+    return evaluate(input, mWeights, status);
+}
+
+vector<float> NeuralNetwork::evaluate(vector<float> input, vector<float>& weights, bool& status)
+{
     vector<float> output;
-    if(input.size() != mInputCount)
+    if(input.size() != mParameters.inputNodes)
     {
         status = false;
         return output;
     }
         
     status = true;
-    if(mHiddenCount == 0)
+    if(mParameters.hiddenNodes == 0)
     {
-        for(unsigned int k = 0; k < mOutputCount; k++)
+        for(unsigned int k = 0; k < mParameters.outputNodes; k++)
         {
             vector<float> weightVec;
-            unsigned int max = (k + 1) * mInputCount + k + 1;
-            unsigned int next = k * mInputCount + k;
+            unsigned int max = (k + 1) * mParameters.inputNodes + k + 1;
+            unsigned int next = k * mParameters.inputNodes + k;
             
             for(unsigned int i = next; i < max; i++)
-                weightVec.push_back(mWeights[i]);
+                weightVec.push_back(weights[i]);
 
             output.push_back(activationFunc(input, weightVec));
         }
@@ -68,27 +58,27 @@ vector<float> NeuralNetwork::evaluate(vector<float> input, bool& status)
     else
     {
         vector<float> hidden;
-        for(unsigned int k = 0; k < mHiddenCount; k++)
+        for(unsigned int k = 0; k < mParameters.hiddenNodes; k++)
         {
             vector<float> weightVec;
-            unsigned int max = (k + 1) * mInputCount + k + 1;
-            unsigned int next = k * mInputCount + k;
+            unsigned int max = (k + 1) * mParameters.inputNodes + k + 1;
+            unsigned int next = k * mParameters.inputNodes + k;
 
             for(unsigned int i = next; i < max; i++)
-                weightVec.push_back(mWeights[i]);
+                weightVec.push_back(weights[i]);
 
             hidden.push_back(activationFunc(input, weightVec));
         }
         
-        unsigned int initial = mHiddenCount * (mInputCount + 1);
-        for(unsigned int k = 0; k < mOutputCount; k++)
+        unsigned int initial = mParameters.hiddenNodes * (mParameters.inputNodes + 1);
+        for(unsigned int k = 0; k < mParameters.outputNodes; k++)
         {
             vector<float> weightVec;
-            unsigned int max = (k + 1) * mHiddenCount + k + 1;
-            unsigned int next = k * mHiddenCount+ k;
+            unsigned int max = (k + 1) * mParameters.hiddenNodes + k + 1;
+            unsigned int next = k * mParameters.hiddenNodes + k;
 
             for(unsigned int i = initial + next; i < initial + max; i++)
-                weightVec.push_back(mWeights[i]);
+                weightVec.push_back(weights[i]);
 
             output.push_back(activationFunc(hidden, weightVec));
         }
@@ -97,19 +87,9 @@ vector<float> NeuralNetwork::evaluate(vector<float> input, bool& status)
     return output;
 }
 
-bool NeuralNetwork::setWeights(vector<float> weights)
-{
-    if(weights.size() == mWeightCount)
-    {
-        mWeights = weights;
-        return true;
-    }
-    else return false;
-
-}
-
 float NeuralNetwork::activationFunc(vector<float> inputs, vector<float> weightVec)
 {
+    //weight vector 1 larger than input to account for bias
     assert(inputs.size() + 1 == weightVec.size());
     double powerVal = 0.0f;
 

@@ -11,8 +11,7 @@
 
 #include "simulation.h"
 #include "neuralnetwork.h"
-#include "object.h"
-#include "common.h"
+#include "chromosome.h"
 
 using namespace std;
 
@@ -20,30 +19,16 @@ enum Crossover{GAUSSIAN_CO, MULTIPOINT_CO, SIMPLEX_CO, SINGLEPOINT_CO, TWOPOINT_
 
 struct GAParams
 {
-    GAParams() : GApopulation(0), simulationPopulation(0), searchSpaceMax(1.0f), searchSpaceMin(-1.0f), maxGenerations(1), simulationCycles(1), 
-        nnInputs(1), nnHiddens(0), nnOutputs(1), maxFitness(1), elitismCount(0), mutationProb(0.0f){}
+    GAParams() : GApopulation(0), searchSpaceMax(1.f), searchSpaceMin(-1.f), maxGenerations(1), elitismCount(0), mutationProb(0.0f), epsilon(1.f){}
     unsigned int GApopulation;
-    unsigned int simulationPopulation;
     float searchSpaceMax;
     float searchSpaceMin;
     unsigned int maxGenerations;
-    unsigned int simulationCycles;
-    unsigned int nnInputs;
-    unsigned int nnHiddens;
-    unsigned int nnOutputs;
-    vector2 modelMoveSpaceMin;
-    vector2 modelMoveSpaceMax;
-    vector2 modelInitSpaceMin;
-    vector2 modelInitSpaceMax;
-    vector2 vMax;
-    vector2 vMin;
-    vector4 modelColour;
-    float maxFitness;
     unsigned int elitismCount;
     float mutationProb;
     float epsilon;
     Crossover crossoverType;
-
+    vector<NeuralNetworkParameter> nnParameters;
 };
 
 
@@ -55,47 +40,42 @@ public:
     GA& operator=(const GA& other);
     ~GA(){}
 
-    NeuralNetwork train(unsigned int& initializationSeed, vector2 goal, unsigned int& generations);
+    vector<NeuralNetwork> train(Simulation* simulation);
     void setParameters(GAParams parameters){mParameters = parameters;};
 
 private:
-    /* INIT AND CLEANUP */
-    vector<Object*> initializeModels(unsigned int initializationSeed);
-    vector<NeuralNetwork> initializePopulation();
-    void cleanupModels(vector<Object*> models);
+    /* INIT */
+    vector<Chromosome> initializePopulation(Simulation* simulation);
 
     /* MUTATION */
-    void mutate(vector<NeuralNetwork>& population);
+    void mutate(vector<Chromosome>& population);
     
     /* CROSSOVER RELATED FUNCTIONS */
-    vector<NeuralNetwork> crossover(vector<NeuralNetwork> population);
+    vector<Chromosome> crossover(vector<Chromosome> population, float maxFitness);
 
     //crossover helper
-    vector<NeuralNetwork> getParents(vector<NeuralNetwork> population, unsigned int numParents);
-    NeuralNetwork selectParent(vector<NeuralNetwork> population, unsigned int& rank);
+    vector<Chromosome> getParents(vector<Chromosome> population, unsigned int numParents);
+    Chromosome selectParent(vector<Chromosome> population, unsigned int& rank);
 
     //crossover types
-    vector<NeuralNetwork> gaussianCrossover(vector<NeuralNetwork> population);
-    vector<NeuralNetwork> multipointCrossover(vector<NeuralNetwork> population);
-    vector<NeuralNetwork> simplexCrossover(vector<NeuralNetwork> population);
-    vector<NeuralNetwork> simulatedbinaryCrossover(vector<NeuralNetwork> population);
-    vector<NeuralNetwork> singlepointCrossover(vector<NeuralNetwork> population);
-    vector<NeuralNetwork> twopointCrossover(vector<NeuralNetwork> population);
+    vector<Chromosome> gaussianCrossover(vector<Chromosome> population, float maxFitness);
+    vector<Chromosome> multipointCrossover(vector<Chromosome> population, float maxFitness);
+    vector<Chromosome> simplexCrossover(vector<Chromosome> population, float maxFitness);
+    vector<Chromosome> simulatedbinaryCrossover(vector<Chromosome> population, float maxFitness);
+    vector<Chromosome> singlepointCrossover(vector<Chromosome> population, float maxFitness);
+    vector<Chromosome> twopointCrossover(vector<Chromosome> population, float maxFitness);
 
     /* MISC */
 
     GA(){}
-    unsigned int getNumWeights(unsigned int numInput, unsigned int numHidden, unsigned int numOutput);
-    vector<NeuralNetwork> getBest(vector<NeuralNetwork> population, unsigned int amount);
-    void quicksort(vector<NeuralNetwork>& elements, int left, int right);
-    float calculateStandardDeviation(vector<NeuralNetwork> population, NeuralNetwork current, unsigned int position);
-    void conformWeights(vector<NeuralNetwork>& population);
-    void evaluatePopulation(vector<NeuralNetwork>& population, vector2 goal, unsigned int initializationSeed);
-
+    vector<unsigned int> getNumWeights();
+    vector<Chromosome> getFirst(vector<Chromosome> population, unsigned int amount);
+    void quicksort(vector<Chromosome>& elements, int left, int right);
+    void conformWeights(vector<Chromosome>& population);
+    void evaluatePopulation(vector<Chromosome>& population, Simulation* simulation);
 
 private:
     GAParams mParameters;
-    Simulation sim;
 };
 
 #endif

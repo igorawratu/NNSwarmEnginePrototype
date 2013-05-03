@@ -10,29 +10,36 @@ using namespace std;
 
 const double e = 2.71828;
 
+class Chromosome;
+
+struct NeuralNetworkParameter
+{
+    unsigned int inputNodes;
+    unsigned int hiddenNodes;
+    unsigned int outputNodes;
+};
+
 class NeuralNetwork
 {
-public:
-    NeuralNetwork(unsigned int numInputs, unsigned int numOutputs, unsigned int numHidden);
-    NeuralNetwork(const NeuralNetwork& other);
-    ~NeuralNetwork();
+friend class Chromosome;
 
+public:
+    NeuralNetwork(NeuralNetworkParameter parameters);
+    NeuralNetwork(const NeuralNetwork& other);
     NeuralNetwork& operator=(const NeuralNetwork& other);
+    ~NeuralNetwork(){}
 
     vector<float> evaluate(vector<float> input, bool& status);
-    bool setWeights(vector<float> weights);
-    vector<float> getWeights(){return mWeights;}
-    void setFitness(float fitness){mFitness = fitness;}
-    float getFitness(){return mFitness;}
 
 private:
     NeuralNetwork(){}
     float activationFunc(vector<float> inputs, vector<float> weightVec);
+    vector<float> evaluate(vector<float> input, vector<float>& weights, bool& status);
 
 private:
     vector<float> mWeights;
-    unsigned int mWeightCount, mInputCount, mOutputCount, mHiddenCount;
-    float mFitness;
+    unsigned int mWeightCount;
+    NeuralNetworkParameter mParameters;
 };
 
 #endif

@@ -1,36 +1,48 @@
 #ifndef SIMULATION_H
 #define SIMULATION_H
 
-#include "object.h"
-#include "common.h"
 #include "neuralnetwork.h"
 
 #include <vector>
-#include <iostream>
-#include <assert.h>
-#include <omp.h>
 
 using namespace std;
 
-const float EPSILON = 5.0f;
-const unsigned int WIDTH = 1600;
-const float MAXDISTANCE= (float)WIDTH;
-const unsigned int HEIGHT = 900;
+struct SimulationParams
+{
+    SimulationParams() : maxFitness(1), simulationCycles(1), cyclesPerDecision(1), modelGroups(1){}
+    vector<unsigned int> simulationPopulation;
+    unsigned int modelGroups;
+    float maxFitness;
+    unsigned int simulationCycles;
+    unsigned int cyclesPerDecision;
+};
 
 class Simulation
 {
 public:
-    Simulation(){}
-    ~Simulation(){}
+    Simulation(SimulationParams parameters, bool renderable){this->parameters = parameters; mRenderable = renderable;}
     Simulation(const Simulation& other){}
     Simulation& operator=(const Simulation& other){}
+    virtual ~Simulation(){}
 
-    void iterate(vector<Object*>& objects, NeuralNetwork brain, vector2 goal, bool makeDecision);
-    float run(unsigned int cycles, NeuralNetwork brain, vector<Object*> objects, vector2 goal);
+    virtual void reset() = 0;
+    virtual void cycle(vector<NeuralNetwork> brains, unsigned int currentIteration) = 0;
+    float fullRun(vector<NeuralNetwork> brains)
+    {
+        for(unsigned int k = 0; k < parameters.simulationCycles; k++)
+            cycle(brains, k);
+    }
+    virtual float evaluateFitness()=0;
+    virtual void render()=0;
 
-private:
-    float calcDistanceSquared(vector2 from, vector2 to);
-    vector<float> makeDecision(NeuralNetwork& brain, vector<float>& inputs);
+public:
+    SimulationParams parameters;
+
+protected:
+    bool mRenderable;
+
+protected:
+    Simulation(){}
 };
 
 #endif

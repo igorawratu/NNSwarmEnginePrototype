@@ -14,6 +14,15 @@
 		/>
 	</Platforms>
 	<ToolFiles>
+		<DefaultToolFile
+			FileName="NvCudaDriverApi.v5.0.rules"
+		/>
+		<DefaultToolFile
+			FileName="NvCudaLinker.v5.0.rules"
+		/>
+		<DefaultToolFile
+			FileName="NvCudaRuntimeApi.v5.0.rules"
+		/>
 	</ToolFiles>
 	<Configurations>
 		<Configuration
@@ -27,7 +36,16 @@
 				Name="VCPreBuildEventTool"
 			/>
 			<Tool
+				Name="CUDA Linker Rule"
+			/>
+			<Tool
+				Name="Cudart Build Rule"
+			/>
+			<Tool
 				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="Driver API Build Rule"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -102,7 +120,16 @@
 				Name="VCPreBuildEventTool"
 			/>
 			<Tool
+				Name="CUDA Linker Rule"
+			/>
+			<Tool
+				Name="Cudart Build Rule"
+			/>
+			<Tool
 				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="Driver API Build Rule"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -177,6 +204,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\chromosome.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ga.cpp"
 				>
 			</File>
@@ -189,11 +220,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\object.cpp"
+				RelativePath=".\pointintersection.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\simulation.cpp"
+				RelativePath=".\renderer.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\squareagent.cpp"
 				>
 			</File>
 		</Filter>
@@ -202,6 +237,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\chromosome.h"
+				>
+			</File>
 			<File
 				RelativePath=".\common.h"
 				>
@@ -219,7 +258,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\pointintersection.h"
+				>
+			</File>
+			<File
+				RelativePath=".\renderer.h"
+				>
+			</File>
+			<File
 				RelativePath=".\simulation.h"
+				>
+			</File>
+			<File
+				RelativePath=".\squareagent.h"
 				>
 			</File>
 		</Filter>
