@@ -27,13 +27,13 @@ public:
 
     virtual void reset() = 0;
     virtual void cycle(vector<NeuralNetwork> brains, unsigned int currentIteration) = 0;
-    float fullRun(vector<NeuralNetwork> brains)
+    void fullRun(vector<NeuralNetwork> brains)
     {
         for(unsigned int k = 0; k < parameters.simulationCycles; k++)
             cycle(brains, k);
     }
     virtual float evaluateFitness()=0;
-    virtual void render()=0;
+    virtual void render(GLuint shadername)=0;
 
 public:
     SimulationParams parameters;

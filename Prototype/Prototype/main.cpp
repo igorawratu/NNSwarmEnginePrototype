@@ -1,11 +1,11 @@
 #include <iostream>
-#include <vector>
-#include <time.h>
+#include <string>
 
-#include "object.h"
-#include "common.h"
-#include "simulation.h"
+#include "filereader.h"
+#include "pointintersection.h"
 #include "ga.h"
+#include "neuralnetwork.h"
+#include "renderer.h"
 
 using namespace std;
 
@@ -16,12 +16,10 @@ const unsigned int BITDEPTH = 32;
 
 int main(int argc, char* args[]) 
 {
-    const GLchar* vssource = "void main(){gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * gl_Vertex; gl_FrontColor = gl_Color;}";
-    const GLchar* fssource = "void main(){gl_FragColor = gl_Color;}";
+       
 
-    //go in simulation
-    
-    //end
+    int c;
+    cin >> c;
 
     return 0; 
 }

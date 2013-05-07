@@ -8,6 +8,14 @@ struct vector2
     float y;
 };
 
+struct vector3
+{
+    vector3() : x(0.0f), y(0.0f), z(0.0f){}
+    float x;
+    float y;
+    float z;
+};
+
 struct vector4
 {
     vector4() : r(0.0f), g(0.0f), b(0.0f), a(0.0f) {}

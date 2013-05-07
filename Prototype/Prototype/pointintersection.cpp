@@ -37,7 +37,7 @@ PointIntersection::PointIntersection(PointIntersectParams piParams, SimulationPa
 
 PointIntersection::~PointIntersection()
 {
-    for(int k = 0; k < mAgents.size(); k++)
+    for(unsigned int k = 0; k < mAgents.size(); k++)
     {
         if(mAgents[k])
         {

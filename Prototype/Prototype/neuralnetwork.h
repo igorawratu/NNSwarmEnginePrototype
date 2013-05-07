@@ -8,7 +8,7 @@
 
 using namespace std;
 
-const double e = 2.71828;
+const float e = 2.71828f;
 
 class Chromosome;
 

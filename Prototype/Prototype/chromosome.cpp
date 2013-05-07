@@ -3,7 +3,7 @@
 Chromosome::Chromosome(vector<NeuralNetworkParameter> parameters)
 {
     mParameters = parameters;
-    for(int k = 0; k < mParameters.size(); k++)
+    for(unsigned int k = 0; k < mParameters.size(); k++)
     {
         mBrains.push_back(NeuralNetwork(mParameters[k]));
         mWeights.push_back(mBrains[k].mWeights);
@@ -31,8 +31,10 @@ const Chromosome& Chromosome::operator=(const Chromosome& other)
     
 vector<NeuralNetwork> Chromosome::getBrains()
 {
-    for(int k = 0; k < mBrains.size(); k++)
+    for(unsigned int k = 0; k < mBrains.size(); k++)
         mBrains[k].mWeights = mWeights[k];
+
+    return mBrains;
 }
 
 void Chromosome::print(PrintMode printMode)

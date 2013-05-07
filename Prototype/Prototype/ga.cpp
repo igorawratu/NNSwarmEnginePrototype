@@ -19,7 +19,7 @@ GA::GA(GAParams parameters)
 vector<unsigned int> GA::getNumWeights()
 {
     vector<unsigned int> counters;
-    for(int k = 0; k < mParameters.nnParameters.size(); k++)
+    for(unsigned int k = 0; k < mParameters.nnParameters.size(); k++)
         counters.push_back((mParameters.nnParameters[k].hiddenNodes > 0) ? mParameters.nnParameters[k].hiddenNodes * 
         (mParameters.nnParameters[k].inputNodes + mParameters.nnParameters[k].outputNodes + 1) + mParameters.nnParameters[k].outputNodes
         : mParameters.nnParameters[k].outputNodes * (mParameters.nnParameters[k].inputNodes + 1));
@@ -40,7 +40,7 @@ vector<Chromosome> GA::initializePopulation(Simulation* simulation)
     for(unsigned int k = 0; k < mParameters.GApopulation; k++)
     {
         vector<vector<float>> currChromosomeWeights;
-        for(int l = 0; l < numWeights.size(); l++)
+        for(unsigned int l = 0; l < numWeights.size(); l++)
         {
             vector<float> currnetweights;
             for(unsigned int i = 0; i < numWeights[l]; i++)
@@ -63,7 +63,7 @@ vector<Chromosome> GA::initializePopulation(Simulation* simulation)
 Chromosome GA::selectParent(vector<Chromosome> population, unsigned int& rank)
 {
     unsigned int max = 0;
-    for(int k = 1; k <= population.size(); k++)
+    for(unsigned int k = 1; k <= population.size(); k++)
         max += k;
 
     boost::mt19937 rankRng(rand());
@@ -109,10 +109,10 @@ vector<Chromosome> GA::gaussianCrossover(vector<Chromosome> population, float ma
     boost::mt19937 rng(rand());
     
     vector<vector<float>> weights;
-    for(int k = 0; k < parents[0].mWeights.size(); k++)
+    for(unsigned int k = 0; k < parents[0].mWeights.size(); k++)
     {
         vector<float> currNetWeights;
-        for(int i = 0; i < parents[0].mWeights[k].size(); i++)
+        for(unsigned int i = 0; i < parents[0].mWeights[k].size(); i++)
         {
             boost::normal_distribution<> normDist((parents[0].mWeights[k][i] + parents[1].mWeights[k][i]) / 2 , fabs(parents[0].mWeights[k][i] - parents[1].mWeights[k][i]));
 	        boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > genCrossover(rng, normDist);
@@ -143,10 +143,10 @@ vector<Chromosome> GA::multipointCrossover(vector<Chromosome> population, float 
     boost::variate_generator<boost::mt19937&, boost::uniform_int<> > genCrossover(rng, multipointDist);
     
     vector<vector<float>> weights;
-    for(int k = 0; k < parents[0].mWeights.size(); k++)
+    for(unsigned int k = 0; k < parents[0].mWeights.size(); k++)
     {
         vector<float> currNetWeights;
-        for(int i = 0; i < parents[0].mWeights[k].size(); i++)
+        for(unsigned int i = 0; i < parents[0].mWeights[k].size(); i++)
             currNetWeights.push_back(genCrossover() == 0? parents[0].mWeights[k][i] : parents[1].mWeights[k][i]);
         weights.push_back(currNetWeights);
     }
@@ -169,15 +169,15 @@ vector<Chromosome> GA::simplexCrossover(vector<Chromosome> population, float max
     quicksort(parents, 0, parents.size() - 1);
 
     vector<vector<float>> weights;
-    for(int k = 0; k < parents[0].mWeights.size(); k++)
+    for(unsigned int k = 0; k < parents[0].mWeights.size(); k++)
     {
         vector<float> com;
         vector<float> childWeights;
         
-        for(int l = 0; l < parents[0].mWeights[k].size(); l++)
+        for(unsigned int l = 0; l < parents[0].mWeights[k].size(); l++)
         {
             com.push_back(0.0f);
-            for(int i = 0; i < parents.size() - 1; i++)
+            for(unsigned int i = 0; i < parents.size() - 1; i++)
                 com[l] += parents[i].mWeights[k][l];
 
             com[l] /= (parents.size() - 1);
@@ -204,7 +204,7 @@ vector<Chromosome> GA::singlepointCrossover(vector<Chromosome> population, float
     
     vector<vector<float>> weights;
 
-    for(int k = 0; k < parents[0].mWeights.size(); k++)
+    for(unsigned int k = 0; k < parents[0].mWeights.size(); k++)
     {
         vector<float> currNetWeights, p1, p2;
         unsigned int pos = rand() % parents[0].mWeights[k].size();
@@ -236,7 +236,7 @@ vector<Chromosome> GA::twopointCrossover(vector<Chromosome> population, float ma
     
     vector<vector<float>> weights;
 
-    for(int k = 0; k < parents[0].mWeights.size(); k++)
+    for(unsigned int k = 0; k < parents[0].mWeights.size(); k++)
     {
         vector<float> currNetWeights, p1, p2;
         unsigned int pos1 = rand() % parents[0].mWeights[k].size();
@@ -275,10 +275,10 @@ vector<Chromosome> GA::simulatedbinaryCrossover(vector<Chromosome> population, f
     
     vector<vector<float>> weights1, weights2;
 
-    for(int k = 0; k < parents[0].mWeights.size(); k++)
+    for(unsigned int k = 0; k < parents[0].mWeights.size(); k++)
     {
         vector<float> currWeights1, currWeights2;
-        for(int i = 0; i < parents[0].mWeights[k].size(); k++)
+        for(unsigned int i = 0; i < parents[0].mWeights[k].size(); k++)
         {
             float random = genCrossover();
             float offset = random > 0.5f? pow(2 * random, 0.5f) : pow(1 / (2 * (1-random)), 0.5f);
@@ -332,11 +332,11 @@ vector<Chromosome> GA::crossover(vector<Chromosome> population, float maxFitness
 
 void GA::conformWeights(vector<Chromosome>& population)
 {
-    for(int k = 0; k < population.size(); k++)
+    for(unsigned int k = 0; k < population.size(); k++)
     {
-        for(int l = 0; l < population[k].mWeights.size(); l++)
+        for(unsigned int l = 0; l < population[k].mWeights.size(); l++)
         {
-            for(int i = 0; i < population[k].mWeights[l].size(); i++)
+            for(unsigned int i = 0; i < population[k].mWeights[l].size(); i++)
             {
                 if(population[k].mWeights[l][i] > mParameters.searchSpaceMax)
                     population[k].mWeights[l][i] = mParameters.searchSpaceMin + fmod(population[k].mWeights[l][i] - mParameters.searchSpaceMax, mParameters.searchSpaceMax - mParameters.searchSpaceMin);
@@ -361,11 +361,11 @@ void GA::mutate(vector<Chromosome>& population)
 	boost::variate_generator<boost::mt19937&, boost::normal_distribution<> > genMutation(mutation, normDist);
 
     
-    for(int i = mParameters.elitismCount; i < population.size(); i++)
+    for(unsigned int i = mParameters.elitismCount; i < population.size(); i++)
     {
-        for(int k = 0; k < population[i].mWeights.size(); k++)
+        for(unsigned int k = 0; k < population[i].mWeights.size(); k++)
         {
-            for(int l = 0; l < population[i].mWeights[k].size(); l++)
+            for(unsigned int l = 0; l < population[i].mWeights[k].size(); l++)
             {
                 if(genMutationProb() <= mParameters.mutationProb)
                     population[i].mWeights[k][l] += genMutation();

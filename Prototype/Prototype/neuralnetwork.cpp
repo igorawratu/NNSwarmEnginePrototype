@@ -6,7 +6,7 @@ NeuralNetwork::NeuralNetwork(NeuralNetworkParameter parameters)
         mWeightCount = mParameters.hiddenNodes * (mParameters.inputNodes + mParameters.outputNodes + 1) + mParameters.outputNodes;
     else mWeightCount = mParameters.outputNodes * (mParameters.inputNodes + 1);
 
-    for(int k = 0; k < mWeightCount; k++)
+    for(unsigned int k = 0; k < mWeightCount; k++)
         mWeights.push_back(0);
 }
 
@@ -91,9 +91,9 @@ float NeuralNetwork::activationFunc(vector<float> inputs, vector<float> weightVe
 {
     //weight vector 1 larger than input to account for bias
     assert(inputs.size() + 1 == weightVec.size());
-    double powerVal = 0.0f;
+    float powerVal = 0.0f;
 
-    for(int k = 0; k < inputs.size(); k++)
+    for(unsigned int k = 0; k < inputs.size(); k++)
         powerVal += weightVec[k] * inputs[k];
     powerVal += -1 * weightVec[weightVec.size() - 1];
 
