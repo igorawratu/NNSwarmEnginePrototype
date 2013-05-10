@@ -378,6 +378,7 @@ vector<NeuralNetwork> GA::train(Simulation* simulation)
 {
     assert(mParameters.GApopulation > mParameters.elitismCount); 
 
+    cout << "Initialising" << endl;
     vector<Chromosome> population = initializePopulation(simulation);
     assert(population.size() > 0);
 

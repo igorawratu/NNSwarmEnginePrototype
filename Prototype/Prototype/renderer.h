@@ -20,7 +20,7 @@ public:
     ~Renderer();
     GLuint initializeShader(const GLchar* vsSource, const GLchar* fsSource);
     bool initialize(GLchar* windowname, const unsigned int width, const unsigned int height, const unsigned int bitdepth);
-    void render(Simulation* simulation);
+    void render(Simulation* simulation, unsigned int shadername);
 
     //when this returns false, terminate program
     bool handleEvents();

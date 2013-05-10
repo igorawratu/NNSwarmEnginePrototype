@@ -208,7 +208,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\competitivesim.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ga.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\lineobject.cpp"
 				>
 			</File>
 			<File
@@ -246,11 +254,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\competitivesim.h"
+				>
+			</File>
+			<File
 				RelativePath=".\filereader.h"
 				>
 			</File>
 			<File
 				RelativePath=".\ga.h"
+				>
+			</File>
+			<File
+				RelativePath=".\lineobject.h"
 				>
 			</File>
 			<File

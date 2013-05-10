@@ -33,7 +33,7 @@ public:
             cycle(brains, k);
     }
     virtual float evaluateFitness()=0;
-    virtual void render(GLuint shadername)=0;
+    virtual void render(unsigned int shadername)=0;
 
 public:
     SimulationParams parameters;

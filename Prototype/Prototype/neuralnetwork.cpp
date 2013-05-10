@@ -2,6 +2,8 @@
 
 NeuralNetwork::NeuralNetwork(NeuralNetworkParameter parameters)
 {
+    mParameters = parameters;
+
     if(mParameters.inputNodes > 0)
         mWeightCount = mParameters.hiddenNodes * (mParameters.inputNodes + mParameters.outputNodes + 1) + mParameters.outputNodes;
     else mWeightCount = mParameters.outputNodes * (mParameters.inputNodes + 1);

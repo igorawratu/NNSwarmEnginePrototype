@@ -19,6 +19,7 @@ public:
     Object(bool renderable)
     {
         mRenderable = renderable;
+        mVbname = mIbname = 0;
     }
 
     virtual ~Object()

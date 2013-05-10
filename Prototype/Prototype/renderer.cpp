@@ -58,10 +58,10 @@ bool Renderer::initialize(GLchar* windowname, const unsigned int width, const un
     return true;
 }
 
-void Renderer::render(Simulation* simulation)
+void Renderer::render(Simulation* simulation, unsigned int shadername)
 {
     glClear(GL_COLOR_BUFFER_BIT);
-    simulation->render();
+    simulation->render(shadername);
     SDL_GL_SwapBuffers();
 }
 
