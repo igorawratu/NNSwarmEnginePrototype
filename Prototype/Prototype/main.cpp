@@ -75,21 +75,21 @@ vector<NeuralNetwork> train()
 
 int main(int argc, char* args[]) 
 {
-    vector<NeuralNetwork> brains = train();
+    //vector<NeuralNetwork> brains = train();
 
     int x;
     cin >> x;
 
     Renderer renderer;
     renderer.initialize("Prototype", WIDTH, HEIGHT, BITDEPTH);
-    unsigned int shadername = initShader(renderer);
+    /*unsigned int shadername = initShader(renderer);
     CompetitiveSimulation sim(getSimParams(), true);
     unsigned int counter = 0;
     while(renderer.handleEvents())
     {
         sim.cycle(brains, counter++);
         renderer.render(&sim, shadername);
-    }
+    }*/
 
     return 0; 
 }
