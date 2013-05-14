@@ -13,10 +13,10 @@ CompetitiveSimulation::CompetitiveSimulation(SimulationParams parameters, bool r
 
     vector2 gPos1, gPos2, gPos3, gPos4, gPos5;
     gPos1.x = 200; gPos1.y = 200;
-    gPos2.x = 500; gPos2.y = 250;
-    gPos3.x = 500; gPos3.y = 400;
-    gPos4.x = 460; gPos4.y = 340;
-    gPos5.x = 800, gPos5.y = 500;
+    gPos2.x = 800; gPos2.y = 300;
+    gPos3.x = 1200; gPos3.y = 600;
+    gPos4.x = 400; gPos4.y = 400;
+    gPos5.x = 1400, gPos5.y = 800;
 
     mGoals.push_back(new SquareAgent(gPos1, gColour, gVelMax, gVelMin, gMoveMax, gMoveMin, false, mRenderable));
     mGoals.push_back(new SquareAgent(gPos2, gColour, gVelMax, gVelMin, gMoveMax, gMoveMin, false, mRenderable));
@@ -112,10 +112,10 @@ void CompetitiveSimulation::cycle(vector<NeuralNetwork> brains, unsigned int cur
             //inputs.push_back(vx); inputs.push_back(vy);
             output = makeDecision(brains[0], inputs);
 	        vector2 acceleration, norm;
-            norm.x = (mGoals[mA1Counter]->getPosition().x - mAgent1->getPosition().x) / (1600*3);
-            norm.y = (mGoals[mA1Counter]->getPosition().y - mAgent1->getPosition().y) / (900*3);
-	        acceleration.x = (((output[0] - 0.5f) / 3) + norm.x)/2;
-	        acceleration.y = (((output[1] - 0.5f) / 3) + norm.y)/2;
+            norm.x = (mGoals[mA1Counter]->getPosition().x - mAgent1->getPosition().x) / 1600;
+            norm.y = (mGoals[mA1Counter]->getPosition().y - mAgent1->getPosition().y) / 900;
+	        acceleration.x = (((output[0] - 0.5f)) + norm.x)/2;
+	        acceleration.y = (((output[1] - 0.5f)) + norm.y)/2;
 	        mAgent1->changeVelocity(acceleration);
             if(calcDistance(mAgent1->getPosition(), mGoals[mA1Counter]->getPosition()) < 40.f)
 	            mA1Counter++;
@@ -136,10 +136,10 @@ void CompetitiveSimulation::cycle(vector<NeuralNetwork> brains, unsigned int cur
             //inputs.push_back(vx); inputs.push_back(vy);
             output = makeDecision(brains[1], inputs);
 	        vector2 acceleration, norm;
-            norm.x = (mGoals[mA2Counter]->getPosition().x - mAgent2->getPosition().x) / (1600/**3*/);
-            norm.y = (mGoals[mA2Counter]->getPosition().y - mAgent2->getPosition().y) / (900/**3*/);
-	        acceleration.x = (((output[0] - 0.5f)/* / 3*/) + norm.x)/2;
-	        acceleration.y = (((output[1] - 0.5f)/* / 3*/) + norm.y)/2;
+            norm.x = (mGoals[mA2Counter]->getPosition().x - mAgent2->getPosition().x) / 1600;
+            norm.y = (mGoals[mA2Counter]->getPosition().y - mAgent2->getPosition().y) / 900;
+	        acceleration.x = (((output[0] - 0.5f)) + norm.x)/2;
+	        acceleration.y = (((output[1] - 0.5f)) + norm.y)/2;
 	        mAgent2->changeVelocity(acceleration);
             if(calcDistance(mAgent2->getPosition(), mGoals[mA2Counter]->getPosition()) < 40.f)
 	            mA2Counter++;
@@ -162,7 +162,7 @@ void CompetitiveSimulation::cycle(vector<NeuralNetwork> brains, unsigned int cur
 
 float CompetitiveSimulation::evaluateFitness()
 {
-    float addAmount = (float)(10 - mA1Counter - mA2Counter) * 200;
+    float addAmount = (float)(10 - mA1Counter - mA2Counter) * (parameters.simulationCycles/10);
     cout << mA1Counter << " " << mA2Counter << endl;
     return mFit + addAmount;
 }

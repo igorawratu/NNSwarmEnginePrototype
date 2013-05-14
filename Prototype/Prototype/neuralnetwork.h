@@ -5,6 +5,7 @@
 #include <iostream>
 #include <math.h>
 #include <assert.h>
+#include <fstream>
 
 using namespace std;
 
@@ -30,6 +31,16 @@ public:
     ~NeuralNetwork(){}
 
     vector<float> evaluate(vector<float> input, bool& status);
+    void print(ofstream& writer)
+    {
+        for(int k = 0; k < mWeights.size(); k++)
+        {
+            writer << mWeights[k];
+            if(k < mWeights.size() - 1)
+                writer << ", ";
+            else writer << endl;
+        }
+    }
 
 private:
     NeuralNetwork(){}

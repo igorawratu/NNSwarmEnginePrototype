@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
 
 #include "filereader.h"
 #include "pointintersection.h"
@@ -32,7 +33,7 @@ vector<NeuralNetworkParameter> getNNParameters()
     for(int k = 0; k < 2; k++)
     {
         NeuralNetworkParameter currParam;
-        currParam.hiddenNodes = 0;
+        currParam.hiddenNodes = 4;
         currParam.outputNodes = 2;
         currParam.inputNodes = 4;
         params.push_back(currParam);
@@ -44,11 +45,11 @@ vector<NeuralNetworkParameter> getNNParameters()
 GAParams getGAParams()
 {
     GAParams parameters;
-    parameters.GApopulation = 100;
+    parameters.GApopulation = 50;
     parameters.searchSpaceMax = 1.f;
     parameters.searchSpaceMin = -1.f;
     parameters.maxGenerations = 100;
-    parameters.elitismCount = 10;
+    parameters.elitismCount = 5;
     parameters.mutationProb = 0.1f;
     parameters.epsilon = 0.f;
     parameters.crossoverType = MULTIPOINT_CO;
@@ -73,23 +74,39 @@ vector<NeuralNetwork> train()
     return ga.train(&sim);
 }
 
+void writeResults(vector<NeuralNetwork> results)
+{
+    ofstream writer;
+    writer.open("result.txt", ios::app);
+
+    for(int k = 0; k < results.size(); k++)
+    {
+        writer << "Neural Network " << k << ":" << endl;
+        results[k].print(writer);
+        writer << endl << endl;
+    }
+
+    writer.close();
+}
+
 int main(int argc, char* args[]) 
 {
-    //vector<NeuralNetwork> brains = train();
+    vector<NeuralNetwork> brains = train();
+    writeResults(brains);
 
     int x;
     cin >> x;
 
     Renderer renderer;
     renderer.initialize("Prototype", WIDTH, HEIGHT, BITDEPTH);
-    /*unsigned int shadername = initShader(renderer);
+    unsigned int shadername = initShader(renderer);
     CompetitiveSimulation sim(getSimParams(), true);
     unsigned int counter = 0;
     while(renderer.handleEvents())
     {
         sim.cycle(brains, counter++);
         renderer.render(&sim, shadername);
-    }*/
+    }
 
     return 0; 
 }
