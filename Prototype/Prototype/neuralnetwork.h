@@ -42,6 +42,8 @@ public:
         }
     }
 
+    void setWeights(vector<float> weights){mWeights = weights;}
+
 private:
     NeuralNetwork(){}
     float activationFunc(vector<float> inputs, vector<float> weightVec);
