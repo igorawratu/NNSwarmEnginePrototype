@@ -47,7 +47,7 @@ bool Renderer::initialize(GLchar* windowname, const unsigned int width, const un
     if(SDL_Init(SDL_INIT_EVERYTHING) < 0)
         return false;
 
-    if(!SDL_SetVideoMode(width, height, bitdepth, SDL_OPENGL))
+    if(!SDL_SetVideoMode(width, height, bitdepth, SDL_OPENGL| SDL_RESIZABLE))
         return false;
 
     if(!initializeOpenGL(width, height))
