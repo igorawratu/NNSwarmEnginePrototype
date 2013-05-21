@@ -5,6 +5,7 @@
 #include <time.h>
 #include <math.h>
 #include <omp.h>
+#include <algorithm>
 
 #include "boost/random.hpp"
 #include "boost/generator_iterator.hpp"
@@ -40,7 +41,7 @@ public:
     GA& operator=(const GA& other);
     ~GA(){}
 
-    vector<NeuralNetwork> train(Simulation* simulation);
+    vector<NeuralNetwork> train(Simulation* simulation, bool compete);
     void setParameters(GAParams parameters){mParameters = parameters;};
 
 private:
@@ -73,6 +74,7 @@ private:
     void quicksort(vector<Chromosome>& elements, int left, int right);
     void conformWeights(vector<Chromosome>& population);
     void evaluatePopulation(vector<Chromosome>& population, Simulation* simulation);
+    void competePopulation(vector<Chromosome>& population);
 
 private:
     GAParams mParameters;

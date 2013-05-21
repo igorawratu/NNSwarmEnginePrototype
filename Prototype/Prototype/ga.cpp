@@ -374,7 +374,7 @@ void GA::mutate(vector<Chromosome>& population)
     }
 }
 
-vector<NeuralNetwork> GA::train(Simulation* simulation)
+vector<NeuralNetwork> GA::train(Simulation* simulation, bool compete)
 {
     assert(mParameters.GApopulation > mParameters.elitismCount); 
 
@@ -388,6 +388,9 @@ vector<NeuralNetwork> GA::train(Simulation* simulation)
     {
         cout << "Generation " << k << endl;
         evaluatePopulation(population, simulation);
+
+        if(compete)
+            competePopulation(population);
 
         if(population[0].mFitness < mParameters.epsilon)
             return population[0].getBrains();
@@ -421,6 +424,43 @@ vector<Chromosome> GA::getFirst(vector<Chromosome> population, unsigned int amou
     output.insert(output.end(), population.begin(), population.begin() + stop);
 
     return output;
+}
+
+void GA::competePopulation(vector<Chromosome>& population)
+{
+    float* fitnessList = new float[population.size()];
+    fill(fitnessList, fitnessList + population.size(), population.size() / 5);
+
+    for(int k = 0; k < population.size(); k++)
+    {
+        vector<Chromosome> copy = population;
+        copy.erase(copy.begin() + k);
+
+        unsigned int counter = 0;
+        while(counter < population.size() / 5)
+        {
+            boost::mt19937 rng(rand());
+            boost::uniform_int<> dist(0, copy.size() - 1);
+            boost::variate_generator<boost::mt19937, boost::uniform_int<>> gen(rng, dist);
+            unsigned int pos = gen();
+
+            if(population[k].mFitness < copy[pos].mFitness)
+                fitnessList[k] -= 1;
+            
+            copy.erase(copy.begin() + pos);
+            counter++;
+        }
+    }
+
+    for(int k = 0; k < population.size(); k++)
+    {
+        population[k].mFitness = fitnessList[k];
+        //cout << "Chromosome " << k << " with fitness " << fitnessList[k] << endl;
+    }
+
+    delete[] fitnessList;
+
+    quicksort(population, 0, population.size() - 1);
 }
 
 void GA::quicksort(vector<Chromosome>& elements, int left, int right)
