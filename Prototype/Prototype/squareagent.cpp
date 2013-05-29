@@ -1,16 +1,47 @@
 #include "squareagent.h"
 
-SquareAgent::SquareAgent(vector2 position, vector4 colour, vector2 velMax, vector2 velMin, vector2 moveMax, vector2 moveMin, bool boundsCheck, bool renderable) : Object(renderable)
+void SquareAgent::initPhys(vector2 position)
 {
-    mInitPos = mPosition = position;
+    if(mColShape)
+        delete mColShape;
+    
+    if(mRigidBody)
+    {
+        mWorld->removeRigidBody(mRigidBody);
+
+        if(mRigidBody->getMotionState())
+            delete mRigidBody->getMotionState();
+
+        delete mRigidBody;
+    }
+
+    btMotionState* motionState;
+
+    mColShape = new btBox2dShape(btVector3(5, 5, 0));
+    motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(position.x, position.y, 0)));
+    
+    btVector3 inertia(0, 0, 0);
+    mColShape->calculateLocalInertia(1, inertia);
+
+    btRigidBody::btRigidBodyConstructionInfo consInf(1, motionState, mColShape, inertia);
+    mRigidBody = new btRigidBody(consInf);
+    mRigidBody->setSleepingThresholds(0.f, mRigidBody->getAngularSleepingThreshold());
+
+    mWorld->addRigidBody(mRigidBody);
+}
+
+SquareAgent::SquareAgent(vector2 position, vector4 colour, vector2 velMax, vector2 velMin, vector2 moveMax, vector2 moveMin, bool boundsCheck, bool renderable, btDiscreteDynamicsWorld* world) : Object(renderable, world)
+{
+    mInitPos = position;
     mColour = colour;
-    mVelocity.x = mVelocity.y = 0.0f;
     mVelMax = velMax;
     mVelMin = velMin;
 	mReached = false;
     mMoveMax = moveMax;
     mMoveMin = moveMin;
     mBoundsCheck = boundsCheck;
+
+    initPhys(mInitPos);
 
 	if(mRenderable)
     {
@@ -44,16 +75,16 @@ SquareAgent::SquareAgent(const SquareAgent& other)
 {
     mInitPos = other.mInitPos;
     mVbname = mIbname = 0;
-    mPosition = other.mPosition;
     mBoundsCheck = other.mBoundsCheck;
     mColour = other.mColour;
-    mVelocity = other.mVelocity;
     mVelMax = other.mVelMax;
     mVelMin = other.mVelMin;
 	mRenderable = other.mRenderable;
 	mReached = other.mReached;
     mMoveMin = other.mMoveMin;
     mMoveMax = other.mMoveMax;
+
+    initPhys(mInitPos);
 
 	if(mRenderable)
     {
@@ -93,15 +124,15 @@ const SquareAgent& SquareAgent::operator=(const SquareAgent& other)
     mVbname = mIbname = 0;
     mInitPos = other.mInitPos;
     mBoundsCheck = other.mBoundsCheck;
-    mPosition = other.mPosition;
     mColour = other.mColour;
-    mVelocity = other.mVelocity;
     mVelMax = other.mVelMax;
     mVelMin = other.mVelMin;
 	mRenderable = other.mRenderable;
 	mReached = other.mReached;
     mMoveMin = other.mMoveMin;
     mMoveMax = other.mMoveMax;
+
+    initPhys(mInitPos);
 
 	if(mRenderable)
     {
@@ -135,11 +166,8 @@ const SquareAgent& SquareAgent::operator=(const SquareAgent& other)
     
 void SquareAgent::update()
 {
-    mPosition.x += mVelocity.x;
-    mPosition.y += mVelocity.y;
-
     //bounds checking
-    if(mBoundsCheck)
+    /*if(mBoundsCheck)
     {
         if(mPosition.x > mMoveMax.x)
         {
@@ -162,7 +190,7 @@ void SquareAgent::update()
             mPosition.y += 2 * (mMoveMin.y - mPosition.y);
             mVelocity.y = -mVelocity.y;
         }
-    }
+    }*/
 }
 
 void SquareAgent::render(GLuint shadername)
@@ -178,7 +206,12 @@ void SquareAgent::render(GLuint shadername)
     glMatrixMode(GL_MODELVIEW);
     glPopMatrix();
     glLoadIdentity();
-    glTranslatef(mPosition.x, mPosition.y, 0.0f);
+
+    btTransform trans;
+    mRigidBody->getMotionState()->getWorldTransform(trans);
+
+    glTranslatef(trans.getOrigin().getX(), trans.getOrigin().getY(), 0.0f); 
+
     glPushMatrix();
 
     glBindBuffer(GL_ARRAY_BUFFER, mVbname);
@@ -200,21 +233,30 @@ void SquareAgent::render(GLuint shadername)
     
 void SquareAgent::changeVelocity(vector2 acceleration)
 {
-    if(mVelocity.x + acceleration.x > mVelMax.x)
-        mVelocity.x = mVelMax.x;
-    else if(mVelocity.x + acceleration.x < mVelMin.x)
-        mVelocity.x = mVelMin.x;
-    else mVelocity.x += acceleration.x;
+    btVector3 newVel;
+    btVector3 velocity = mRigidBody->getLinearVelocity();
 
-    if(mVelocity.y + acceleration.y > mVelMax.y)
-        mVelocity.y = mVelMax.y;
-    else if(mVelocity.y + acceleration.y < mVelMin.y)
-        mVelocity.y = mVelMin.y;
-    else mVelocity.y += acceleration.y;
+    if(velocity.getX() + acceleration.x > mVelMax.x)
+        newVel.setX(mVelMax.x);
+    else if(velocity.getX() + acceleration.x < mVelMin.x)
+        newVel.setX(mVelMin.x);
+    else newVel.setX(velocity.getX() + acceleration.x);
+
+    if(velocity.getY() + acceleration.y > mVelMax.y)
+        newVel.setY(mVelMax.y);
+    else if(velocity.getY() + acceleration.y < mVelMin.y)
+        newVel.setY(mVelMin.y);
+    else newVel.setY(velocity.getY() + acceleration.y);
+
+    newVel.setZ(0.f);
+    newVel.setW(1.f);
+
+    mRigidBody->setLinearVelocity(newVel);
 }
 
 void SquareAgent::reset()
 {
-    mPosition = mInitPos;
-    mVelocity.x = mVelocity.y = 0.0f;
+    mRigidBody->setLinearVelocity(btVector3(0, 0, 0));
+    mRigidBody->getMotionState()->setWorldTransform(btTransform(btQuaternion(0, 0, 0, 1), btVector3(mInitPos.x, mInitPos.y, 0)));
+    mReached = false;
 }

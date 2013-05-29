@@ -31,12 +31,13 @@ class PointIntersection: public Simulation
 {
 public:
     PointIntersection(PointIntersectParams piParams, SimulationParams parameters, unsigned int seed, vector2 goal, bool renderable);
-    virtual ~PointIntersection();
+    virtual ~PointIntersection(){}
 
     virtual void reset();
     virtual void cycle(vector<NeuralNetwork> brains, unsigned int currentIteration);
     virtual float evaluateFitness();
     virtual void render(GLuint shadername);
+    virtual void shutdown();
 
 private:
     float calcDistance(vector2 from, vector2 to);

@@ -19,23 +19,23 @@ PointIntersection::PointIntersection(PointIntersectParams piParams, SimulationPa
     gColour.r = gColour.b = 0;
     gColour.g = gColour.a = 1.0f;
     gVelMax.x = gVelMax.y = gVelMin.x = gVelMin.y = gMoveMax.x = gMoveMax.y = gMoveMin.x = gMoveMin.y = 0.0f;
-    mGoal = new SquareAgent(goal, gColour, gVelMax, gVelMin, gMoveMax, gMoveMin, mPIParams.checkBounds, mRenderable);
+    mGoal = new SquareAgent(goal, gColour, gVelMax, gVelMin, gMoveMax, gMoveMin, mPIParams.checkBounds, mRenderable, mWorld);
 
     //initialise models, assume one type for now
     vector4 aColour;
     aColour.g = aColour.b = 0;
     aColour.r = aColour.a = 1.0f;
-    for(unsigned int k = 0; k < parameters.simulationPopulation.size(); k++)
+    for(int k = 0; k < parameters.simulationPopulation[0]; k++)
     {
         vector2 pos;
         pos.x = genx();
         pos.y = geny();
         
-        mAgents.push_back(new SquareAgent(pos, aColour, mPIParams.velMax, mPIParams.velMin, mPIParams.modelMoveSpaceMax, mPIParams.modelMoveSpaceMin, mPIParams.checkBounds, mRenderable));
+        mAgents.push_back(new SquareAgent(pos, aColour, mPIParams.velMax, mPIParams.velMin, mPIParams.modelMoveSpaceMax, mPIParams.modelMoveSpaceMin, mPIParams.checkBounds, mRenderable, mWorld));
     }
 }
 
-PointIntersection::~PointIntersection()
+void PointIntersection::shutdown()
 {
     for(unsigned int k = 0; k < mAgents.size(); k++)
     {
@@ -97,6 +97,8 @@ void PointIntersection::cycle(vector<NeuralNetwork> brains, unsigned int current
         if(calcDistance(mAgents[k]->getPosition(), mGoal->getPosition()) < EPSILON)
 		    mAgents[k]->setReached(true);
 	}
+
+    mWorld->stepSimulation(5.f, 100);
 }
 
 float PointIntersection::evaluateFitness()

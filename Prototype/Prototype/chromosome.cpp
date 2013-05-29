@@ -40,4 +40,12 @@ vector<NeuralNetwork> Chromosome::getBrains()
 void Chromosome::print(PrintMode printMode)
 {
     //can leave for later
+    for(unsigned int k = 0; k < mWeights.size(); k++)
+    {
+        cout << "NN: " << k << endl;
+        for(unsigned int i = 0; i < mWeights[k].size(); i++)
+            cout << mWeights[k][i] << " ";
+        cout << endl;
+    }
+    cout << endl << endl;
 }

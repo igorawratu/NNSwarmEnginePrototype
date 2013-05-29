@@ -2,12 +2,17 @@
 
 Renderer::~Renderer()
 {
+    
+}
+
+void Renderer::shutdown()
+{
     for(unsigned int k = 0; k < shaders.size(); k++)
         glDeleteProgram(shaders[k]);
 
     SDL_Quit();
 }
-    
+
 GLuint Renderer::initializeShader(const GLchar* vsSource, const GLchar* fsSource)
 {
     GLint shaderCompiled;
@@ -101,7 +106,7 @@ bool Renderer::initializeOpenGL(const unsigned int width, const unsigned int hei
     return true;
 }
 
-bool Renderer::handleEvents()
+bool Renderer::handleEvents() 
 {
     SDL_Event event;
     bool run = true;

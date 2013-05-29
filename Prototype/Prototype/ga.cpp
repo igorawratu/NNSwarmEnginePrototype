@@ -394,7 +394,7 @@ vector<NeuralNetwork> GA::train(Simulation* simulation, bool compete)
 
         if(population[0].mFitness < mParameters.epsilon)
             return population[0].getBrains();
-
+        
         vector<Chromosome> newPopulation = getFirst(population, mParameters.elitismCount);
         while(newPopulation.size() < population.size())
         {
@@ -412,6 +412,8 @@ vector<NeuralNetwork> GA::train(Simulation* simulation, bool compete)
         conformWeights(population);
     }
     evaluatePopulation(population, simulation);
+
+    
 
     return population[0].getBrains();
 }
@@ -506,6 +508,7 @@ void GA::evaluatePopulation(vector<Chromosome>& population, Simulation* simulati
         
         if(fitness < mParameters.epsilon)
             break;
+
     }
 
     quicksort(population, 0, population.size() - 1);

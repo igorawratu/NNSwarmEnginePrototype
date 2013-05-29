@@ -79,9 +79,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDL.lib SDLmain.lib opengl32.lib glu32.lib glew32.lib"
+				AdditionalDependencies="SDL.lib SDLmain.lib opengl32.lib glu32.lib glew32.lib LinearMath_vs2008_debug.lib BulletCollision_vs2008_debug.lib BulletDynamics_vs2008_debug.lib"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;$(CPPREPO)\SDL-devel-1.2.15-VC\SDL-1.2.15\lib\x86&quot;;&quot;$(CPPREPO)\glew-1.9.0\lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(CPPREPO)\Visual Leak Detector\lib\Win32&quot;;&quot;$(CPPREPO)\SDL-devel-1.2.15-VC\SDL-1.2.15\lib\x86&quot;;&quot;$(CPPREPO)\glew-1.9.0\lib&quot;;&quot;$(CPPREPO)\bullet\lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				TargetMachine="1"
@@ -163,9 +163,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="SDL.lib SDLmain.lib opengl32.lib glu32.lib glew32.lib"
+				AdditionalOptions="/NODEFAULTLIB:LIBCMT"
+				AdditionalDependencies="SDL.lib SDLmain.lib opengl32.lib glu32.lib glew32.lib BulletCollision_vs2008.lib BulletDynamics_vs2008.lib LinearMath_vs2008.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(CPPREPO)\SDL-devel-1.2.15-VC\SDL-1.2.15\lib\x86&quot;;&quot;$(CPPREPO)\glew-1.9.0\lib&quot;"
+				AdditionalLibraryDirectories="&quot;$(CPPREPO)\bullet\lib&quot;;&quot;$(CPPREPO)\SDL-devel-1.2.15-VC\SDL-1.2.15\lib\x86&quot;;&quot;$(CPPREPO)\glew-1.9.0\lib&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"

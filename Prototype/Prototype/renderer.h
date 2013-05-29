@@ -24,6 +24,7 @@ public:
 
     //when this returns false, terminate program
     bool handleEvents();
+    void shutdown();
 
 private:
     bool initializeOpenGL(const unsigned int width, const unsigned int height);

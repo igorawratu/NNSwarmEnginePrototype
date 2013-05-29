@@ -1,10 +1,48 @@
 #include "lineobject.h"
 
-LineObject::LineObject(vector2 position, vector2 first, vector2 second, bool renderable) : Object(renderable)
+
+void LineObject::initPhysics(vector2 pos1, vector2 pos2)
+{
+    if(mColShape)
+        delete mColShape;
+    
+    if(mRigidBody)
+    {
+        mWorld->removeRigidBody(mRigidBody);
+
+        if(mRigidBody->getMotionState())
+            delete mRigidBody->getMotionState();
+
+        delete mRigidBody;
+    }
+
+    btMotionState* motionState;
+    btVector3 points[2] = {btVector3(pos1.x, pos1.y, 0), btVector3(pos2.x, pos2.y, 0)};
+
+    btConvexShape* childShape = new btConvexHullShape(&points[0].getX(), 2);
+    mColShape = new btConvex2dShape(childShape);
+
+    motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, 0)));
+    
+    btVector3 inertia(0, 0, 0);
+    mColShape->calculateLocalInertia(0, inertia);
+
+    btRigidBody::btRigidBodyConstructionInfo consInf(0, motionState, mColShape, inertia);
+    mRigidBody = new btRigidBody(consInf);
+    mRigidBody->setSleepingThresholds(0.f, mRigidBody->getAngularSleepingThreshold());
+
+    mWorld->addRigidBody(mRigidBody);
+}
+
+
+
+LineObject::LineObject(vector2 position, vector2 first, vector2 second, bool renderable, btDiscreteDynamicsWorld* world) : Object(renderable, world)
 {
     mPosition = position;
     mFirst = first;
     mSecond = second;
+
+    initPhysics(first, second);
 
     if(mRenderable)
     {
@@ -35,6 +73,8 @@ LineObject::LineObject(const LineObject& other)
     mRenderable = other.mRenderable;
     mFirst = other.mFirst;
     mSecond = other.mSecond;
+    
+    initPhysics(mFirst, mSecond);
 
     if(mRenderable)
     {
@@ -70,6 +110,8 @@ const LineObject& LineObject::operator=(const LineObject& other)
     mPosition = other.mPosition;
     mFirst = other.mFirst;
     mSecond = other.mSecond;
+
+    initPhysics(mFirst, mSecond);
 
     if(mRenderable)
     {

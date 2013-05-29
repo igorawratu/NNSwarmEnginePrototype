@@ -9,10 +9,13 @@
 #include "object.h"
 #include "common.h"
 
+#include <btBulletDynamicsCommon.h>
+#include "BulletCollision/CollisionShapes/btConvex2dShape.h"
+
 class LineObject: public Object
 {
 public:
-    LineObject(vector2 position, vector2 first, vector2 second, bool renderable);
+    LineObject(vector2 position, vector2 first, vector2 second, bool renderable, btDiscreteDynamicsWorld* world);
     LineObject(const LineObject& other);
     virtual ~LineObject(){}
     const LineObject& operator=(const LineObject& other);
@@ -24,6 +27,7 @@ public:
 
 private:
     LineObject(){}
+    void initPhysics(vector2 pos1, vector2 pos2);
 
 private:
     vector2 mPosition, mFirst, mSecond;

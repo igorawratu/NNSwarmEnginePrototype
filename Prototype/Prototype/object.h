@@ -10,16 +10,21 @@
 
 #include "common.h"
 
+#include <btBulletDynamicsCommon.h>
+
 using namespace std;
 
 class Object
 {
 public:
     //Object(vector2 position, vector4 colour, vector2 velMax, vector2 velMin, vector2 moveMax, vector2 moveMin, bool renderable);
-    Object(bool renderable)
+    Object(bool renderable, btDiscreteDynamicsWorld* world)
     {
         mRenderable = renderable;
         mVbname = mIbname = 0;
+        mWorld = world;
+        mColShape = 0;
+        mRigidBody = 0;
     }
 
     virtual ~Object()
@@ -28,6 +33,22 @@ public:
             glDeleteBuffers(1, &mVbname);
         if(mIbname)
             glDeleteBuffers(1, &mIbname);
+
+        if(mColShape)
+        {
+            delete mColShape;
+            mColShape = 0;
+        }
+        
+        if(mRigidBody)
+        {
+            mWorld->removeRigidBody(mRigidBody);
+            if(mRigidBody->getMotionState())
+                delete mRigidBody->getMotionState();
+            
+            delete mRigidBody;
+            mRigidBody = 0;
+        }
     }
     
     virtual void update()=0;
@@ -55,6 +76,10 @@ protected:
     Object& operator=(const Object& other){}
 
 protected:
+    btDiscreteDynamicsWorld* mWorld;
+    btCollisionShape* mColShape;
+    btRigidBody* mRigidBody;
+
     GLuint mVbname, mIbname;
     bool mRenderable;
 };

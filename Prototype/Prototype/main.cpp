@@ -10,6 +10,19 @@
 #include "renderer.h"
 #include "competitivesim.h"
 
+//#define MLEAKDEBUG
+
+#ifdef MLEAKDEBUG
+    #define _CRTDBG_MAP_ALLOC
+    #include <stdlib.h>
+    #include <crtdbg.h>
+
+    #ifdef _DEBUG
+    #define DEBUG_NEW new(_NORMAL_BLOCK, __FILE__, __LINE__)
+    #define new DEBUG_NEW
+    #endif
+#endif
+
 using namespace std;
 
 const unsigned int WIDTH = 1600;
@@ -20,8 +33,9 @@ SimulationParams getSimParams()
 {
     SimulationParams params;
     params.modelGroups = 2;
-    params.simulationCycles = 2000;
+    params.simulationCycles = 1000;
     params.cyclesPerDecision = 10;
+    params.maxFitness = 3000;
 
     return params;
 }
@@ -35,7 +49,7 @@ vector<NeuralNetworkParameter> getNNParameters()
         NeuralNetworkParameter currParam;
         currParam.hiddenNodes = 4;
         currParam.outputNodes = 2;
-        currParam.inputNodes = 4;
+        currParam.inputNodes = 3;
         params.push_back(currParam);
     }
 
@@ -51,7 +65,7 @@ GAParams getGAParams()
     parameters.maxGenerations = 100;
     parameters.elitismCount = 5;
     parameters.mutationProb = 0.1f;
-    parameters.epsilon = 0.f;
+    parameters.epsilon = 1.f;
     parameters.crossoverType = MULTIPOINT_CO;
     parameters.nnParameters = getNNParameters();
 
@@ -91,6 +105,7 @@ void writeResults(vector<NeuralNetwork> results)
 
 int main(int argc, char* args[]) 
 {
+    srand(time(0));
     vector<NeuralNetwork> brains = train();
     writeResults(brains);
 
@@ -104,7 +119,7 @@ int main(int argc, char* args[])
     vector<NeuralNetworkParameter> nnparams = getNNParameters();
     
     vector<float> nn1(nn1arr, nn1arr + sizeof(nn1arr) / sizeof(nn1arr[0]));
-    vector<float> nn2(nn1arr, nn2arr + sizeof(nn2arr) / sizeof(nn2arr[0]));
+    vector<float> nn2(nn2arr, nn2arr + sizeof(nn2arr) / sizeof(nn2arr[0]));
     
     NeuralNetwork net1(nnparams[0]), net2(nnparams[1]);
    
@@ -113,6 +128,7 @@ int main(int argc, char* args[])
     vector<NeuralNetwork> brains;
     brains.push_back(net1);
     brains.push_back(net2);*/
+
 
     Renderer renderer;
     renderer.initialize("Prototype", WIDTH, HEIGHT, BITDEPTH);
@@ -124,6 +140,14 @@ int main(int argc, char* args[])
         sim.cycle(brains, counter++);
         renderer.render(&sim, shadername);
     }
+
+
+    sim.shutdown();
+    renderer.shutdown();
+    
+#ifdef MLEAKDEBUG
+    _CrtDumpMemoryLeaks();
+#endif
 
     return 0; 
 }

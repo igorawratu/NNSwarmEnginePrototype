@@ -2,40 +2,57 @@
 
 CompetitiveSimulation::CompetitiveSimulation(SimulationParams parameters, bool renderable) : Simulation(parameters, renderable)
 {
-    mA1Counter = mA2Counter = 0;
-    mFit = 0;
+    mWinner = -1;
     //create goal object
     vector2 gVelMax, gVelMin, gMoveMax, gMoveMin, modelVelMax, modelVelMin, modelMoveMax, modelMoveMin;
     vector4 gColour;
     gColour.r = gColour.b = 0;
     gColour.g = gColour.a = 1.0f;
-    gVelMax.x = gVelMax.y = gVelMin.x = gVelMin.y = gMoveMax.x = gMoveMax.y = gMoveMin.x = gMoveMin.y = 0.0f;
+    gVelMin.x = gVelMin.y =  gVelMax.x = gVelMax.y = gMoveMax.x = gMoveMax.y = gMoveMin.x = gMoveMin.y = 0.0f;
 
-    vector2 gPos1, gPos2, gPos3, gPos4, gPos5;
-    gPos1.x = 200; gPos1.y = 200;
-    gPos2.x = 800; gPos2.y = 300;
-    gPos3.x = 1200; gPos3.y = 600;
-    gPos4.x = 400; gPos4.y = 400;
-    gPos5.x = 1400, gPos5.y = 800;
+    vector2 gTopPos1, gTopPos2, gTopPos3, gTopPos4, gTopPos5, gTopPos6;
+    vector2 gBotPos1, gBotPos2, gBotPos3, gBotPos4, gBotPos5, gBotPos6;
+    vector2 frontStopPos1, frontStopPos2, backStopPos1, backStopPos2;
 
-    mGoals.push_back(new SquareAgent(gPos1, gColour, gVelMax, gVelMin, gMoveMax, gMoveMin, false, mRenderable));
-    mGoals.push_back(new SquareAgent(gPos2, gColour, gVelMax, gVelMin, gMoveMax, gMoveMin, false, mRenderable));
-    mGoals.push_back(new SquareAgent(gPos3, gColour, gVelMax, gVelMin, gMoveMax, gMoveMin, false, mRenderable));
-    mGoals.push_back(new SquareAgent(gPos4, gColour, gVelMax, gVelMin, gMoveMax, gMoveMin, false, mRenderable));
-    mGoals.push_back(new SquareAgent(gPos5, gColour, gVelMax, gVelMin, gMoveMax, gMoveMin, false, mRenderable));
+    gTopPos1.x = 50; gTopPos1.y = 200;
+    gTopPos2.x = 400; gTopPos2.y = 250;
+    gTopPos3.x = 700; gTopPos3.y = 100;
+    gTopPos4.x = 800; gTopPos4.y = 150;
+    gTopPos5.x = 1200; gTopPos5.y = 150;
+    gTopPos6.x = 1500; gTopPos6.y = 300;
 
-    mIndicators.push_back(new LineObject(vector2(), gPos1, gPos2, mRenderable));
-    mIndicators.push_back(new LineObject(vector2(), gPos2, gPos3, mRenderable));
-    mIndicators.push_back(new LineObject(vector2(), gPos3, gPos4, mRenderable));
-    mIndicators.push_back(new LineObject(vector2(), gPos4, gPos5, mRenderable));
+    gBotPos1.x = 50; gBotPos1.y = 600;
+    gBotPos2.x = 400; gBotPos2.y = 550;
+    gBotPos3.x = 700; gBotPos3.y = 700;
+    gBotPos4.x = 800; gBotPos4.y = 750;
+    gBotPos5.x = 1200; gBotPos5.y = 750;
+    gBotPos6.x = 1500; gBotPos6.y = 600;
+
+    frontStopPos1 = gTopPos1;
+    frontStopPos2 = gBotPos1;
+
+    mIndicators.push_back(new LineObject(vector2(), gTopPos1, gTopPos2, mRenderable, mWorld));
+    mIndicators.push_back(new LineObject(vector2(), gTopPos2, gTopPos3, mRenderable, mWorld));
+    mIndicators.push_back(new LineObject(vector2(), gTopPos3, gTopPos4, mRenderable, mWorld));
+    mIndicators.push_back(new LineObject(vector2(), gTopPos4, gTopPos5, mRenderable, mWorld));
+    mIndicators.push_back(new LineObject(vector2(), gTopPos5, gTopPos6, mRenderable, mWorld));
+
+    mIndicators.push_back(new LineObject(vector2(), gBotPos1, gBotPos2, mRenderable, mWorld));
+    mIndicators.push_back(new LineObject(vector2(), gBotPos2, gBotPos3, mRenderable, mWorld));
+    mIndicators.push_back(new LineObject(vector2(), gBotPos3, gBotPos4, mRenderable, mWorld));
+    mIndicators.push_back(new LineObject(vector2(), gBotPos4, gBotPos5, mRenderable, mWorld));
+    mIndicators.push_back(new LineObject(vector2(), gBotPos5, gBotPos6, mRenderable, mWorld));
+
+    mIndicators.push_back(new LineObject(vector2(), frontStopPos1, frontStopPos2, mRenderable, mWorld));
+
 
     vector2 a1pos, a2pos; vector4 a1col, a2col;
     a1col.g = a2col.g = 0;
     a1col.r = 0; a2col.r = 1.0f;
     a1col.b = 1.0f; a2col.b = 0.0f;
     a1col.a = a2col.a = 1.0f;
-    a1pos.x = 100; a1pos.y = 190;
-    a2pos.x = 100; a2pos.y = 210;
+    a1pos.x = 100; a1pos.y = 400;
+    a2pos.x = 100; a2pos.y = 420;
     modelVelMax.x = 2.0f;
     modelVelMax.y = 2.0f;
     modelVelMin.x = -2.0f;
@@ -44,21 +61,12 @@ CompetitiveSimulation::CompetitiveSimulation(SimulationParams parameters, bool r
     modelMoveMax.x = 1600;
     modelMoveMax.y = 900;
 
-    mAgent1 = new SquareAgent(a1pos, a1col, modelVelMax, modelVelMin, modelMoveMax, modelMoveMin, false, mRenderable);
-    mAgent2 = new SquareAgent(a2pos, a2col, modelVelMax, modelVelMin, modelMoveMax, modelMoveMin, false, mRenderable);
+    mAgent1 = new SquareAgent(a1pos, a1col, modelVelMax, modelVelMin, modelMoveMax, modelMoveMin, false, mRenderable, mWorld);
+    mAgent2 = new SquareAgent(a2pos, a2col, modelVelMax, modelVelMin, modelMoveMax, modelMoveMin, false, mRenderable, mWorld);
 }
 
-CompetitiveSimulation::~CompetitiveSimulation()
+void CompetitiveSimulation::shutdown()
 {
-    for(unsigned int k = 0; k < mGoals.size(); k++)
-    {
-        if(mGoals[k])
-        {
-            delete mGoals[k];
-            mGoals[k] = 0;
-        }
-    }
-
     for(unsigned int k = 0; k < mIndicators.size(); k++)
     {
         if(mIndicators[k])
@@ -85,8 +93,6 @@ void CompetitiveSimulation::reset()
 {
     mAgent1->reset();
     mAgent2->reset();
-    mA1Counter = mA2Counter = 0;
-    mFit = 0;
 }
 
 void CompetitiveSimulation::cycle(vector<NeuralNetwork> brains, unsigned int currentIteration)
@@ -97,81 +103,75 @@ void CompetitiveSimulation::cycle(vector<NeuralNetwork> brains, unsigned int cur
     if(currentIteration % parameters.cyclesPerDecision == 0)
     {
         //agent1
-        if(mA1Counter < 5)
-        {
-            vector<float> inputs, output;
-            float x, y, gx, gy, vx, vy;
-            x = mAgent1->getPosition().x/(1600.0f / 2.0f) - 1.0f;
-            y = mAgent1->getPosition().y/(900.0f / 2.0f) - 1.0f;
-            gx = mGoals[mA1Counter]->getPosition().x/(1600.0f / 2.0f) - 1.0f;
-            gy = mGoals[mA1Counter]->getPosition().y/(900.0f / 2.0f) - 1.0f;
-            vx = mAgent1->getVelocity().x;
-            vy = mAgent1->getVelocity().y;
-	        inputs.push_back(x); inputs.push_back(y);
-	        inputs.push_back(gx); inputs.push_back(gy);
-            //inputs.push_back(vx); inputs.push_back(vy);
-            output = makeDecision(brains[0], inputs);
-	        vector2 acceleration, norm;
-            norm.x = (mGoals[mA1Counter]->getPosition().x - mAgent1->getPosition().x) / 1600;
-            norm.y = (mGoals[mA1Counter]->getPosition().y - mAgent1->getPosition().y) / 900;
-	        acceleration.x = (((output[0] - 0.5f)) + norm.x)/2;
-	        acceleration.y = (((output[1] - 0.5f)) + norm.y)/2;
-	        mAgent1->changeVelocity(acceleration);
-            if(calcDistance(mAgent1->getPosition(), mGoals[mA1Counter]->getPosition()) < 40.f)
-	            mA1Counter++;
-        }
+        vector<float> a1inputs, a1output, a2inputs, a2output;
+        float a1x, a1y, gx, a2x, a2y;
+        a1x = mAgent1->getPosition().x/(800.f) - 1.0f;
+        a1y = mAgent1->getPosition().y/(450.f) - 1.0f;
+        a2x = mAgent2->getPosition().x/(800.f) - 1.0f;
+        a2y = mAgent2->getPosition().y/(450.f) - 1.0f;
+        gx = 1500.f/(800.f) - 1.0f;
 
-        if(mA2Counter < 5)
-        {
-            vector<float> inputs, output;
-            float x, y, gx, gy, vx, vy;
-            x = mAgent2->getPosition().x/(1600.0f / 2.0f) - 1.0f;
-            y = mAgent2->getPosition().y/(900.0f / 2.0f) - 1.0f;
-            gx = mGoals[mA2Counter]->getPosition().x/(1600.0f / 2.0f) - 1.0f;
-            gy = mGoals[mA2Counter]->getPosition().y/(900.0f / 2.0f) - 1.0f;
-            vx = mAgent2->getVelocity().x;
-            vy = mAgent2->getVelocity().y;
-	        inputs.push_back(x); inputs.push_back(y);
-	        inputs.push_back(gx); inputs.push_back(gy);
-            //inputs.push_back(vx); inputs.push_back(vy);
-            output = makeDecision(brains[1], inputs);
-	        vector2 acceleration, norm;
-            norm.x = (mGoals[mA2Counter]->getPosition().x - mAgent2->getPosition().x) / 1600;
-            norm.y = (mGoals[mA2Counter]->getPosition().y - mAgent2->getPosition().y) / 900;
-	        acceleration.x = (((output[0] - 0.5f)) + norm.x)/2;
-	        acceleration.y = (((output[1] - 0.5f)) + norm.y)/2;
-	        mAgent2->changeVelocity(acceleration);
-            if(calcDistance(mAgent2->getPosition(), mGoals[mA2Counter]->getPosition()) < 40.f)
-	            mA2Counter++;
-        }
+        a1inputs.push_back(a1x); a1inputs.push_back(a1y);
+        a1inputs.push_back(gx);
+
+        a2inputs.push_back(a2x); a2inputs.push_back(a2y);
+        a2inputs.push_back(gx);
+
+        a1output = makeDecision(brains[0], a1inputs);
+        a2output = makeDecision(brains[1], a2inputs);
+
+        vector2 accel1, accel2;
+
+        accel1.x = (a1output[0] - 0.5f)/2;
+        accel1.y = (a1output[1] - 0.5f)/2;
+
+        accel2.x = (a2output[0] - 0.5f)/2;
+        accel2.y = (a2output[1] - 0.5f)/2;
+
+        mAgent1->changeVelocity(accel1);
+        mAgent2->changeVelocity(accel2);
+    }
+
+	mWorld->stepSimulation(1.f, 60);
+
+    if(!mAgent1->getReached())
+    {
+        if(mAgent1->getPosition().x >= 1500)
+            mAgent1->setReached(true);
     }
     
-    if(mA1Counter < mA2Counter)
-        mFit += 1;
-    if(5 > mA1Counter || 5 > mA2Counter)
+    if(!mAgent2->getReached())
     {
-        //mFit += calcDistance(mAgent1->getVelocity(), mAgent2->getVelocity());
-        mFit += (2.0f - fabs(mAgent1->getVelocity().x) + 2.0f - fabs(mAgent1->getVelocity().y))/4;
-        mFit += (2.0f - fabs(mAgent2->getVelocity().x) + 2.0f - fabs(mAgent2->getVelocity().y))/4;
+        if(mAgent2->getPosition().x >= 1500)
+            mAgent2->setReached(true);
     }
 
-	mAgent1->update();
-    mAgent2->update();
+    if(mWinner == -1)
+    {
+        if(mAgent1->getReached())
+            mWinner = 0;
+        else if(mAgent2->getReached())
+            mWinner = 1;
+    }
+
     
 }
 
 float CompetitiveSimulation::evaluateFitness()
 {
-    float addAmount = (float)(10 - mA1Counter - mA2Counter) * (parameters.simulationCycles/10);
-    cout << mA1Counter << " " << mA2Counter << endl;
-    return mFit + addAmount;
+    float fitness = 0.f;
+
+    if(!mAgent1->getReached())
+        fitness += 1500.f - mAgent1->getPosition().x;
+
+    if(!mAgent2->getReached())
+        fitness += 1500.f - mAgent2->getPosition().x;
+
+    return fitness;
 }
 
 void CompetitiveSimulation::render(GLuint shadername)
 {
-    for(unsigned int k = 0; k < mGoals.size(); k++)
-        mGoals[k]->render(shadername);
-
     for(unsigned int k = 0; k < mIndicators.size(); k++)
         mIndicators[k]->render(shadername);
 

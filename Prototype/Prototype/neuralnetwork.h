@@ -42,6 +42,17 @@ public:
         }
     }
 
+    void print()
+    {
+        for(int k = 0; k < mWeights.size(); k++)
+        {
+            cout << mWeights[k];
+            if(k < mWeights.size() - 1)
+                cout << ", ";
+            else cout << endl;
+        }
+    }
+
     void setWeights(vector<float> weights){mWeights = weights;}
 
 private:
