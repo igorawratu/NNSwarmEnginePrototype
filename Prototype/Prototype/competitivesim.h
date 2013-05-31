@@ -23,6 +23,7 @@ public:
     virtual float evaluateFitness();
     virtual void render(GLuint shadername);
     virtual void shutdown();
+    void conformVelocities();
 
 private:
     float calcDistance(vector2 from, vector2 to);

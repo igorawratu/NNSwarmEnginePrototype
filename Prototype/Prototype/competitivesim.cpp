@@ -1,5 +1,11 @@
 #include "competitivesim.h"
 
+void tickCallBack(btDynamicsWorld* world, btScalar timeStep)
+{
+    CompetitiveSimulation* csim = (CompetitiveSimulation*)world->getWorldUserInfo();
+    csim->conformVelocities();
+}
+
 CompetitiveSimulation::CompetitiveSimulation(SimulationParams parameters, bool renderable) : Simulation(parameters, renderable)
 {
     mWinner = -1;
@@ -63,6 +69,9 @@ CompetitiveSimulation::CompetitiveSimulation(SimulationParams parameters, bool r
 
     mAgent1 = new SquareAgent(a1pos, a1col, modelVelMax, modelVelMin, modelMoveMax, modelMoveMin, false, mRenderable, mWorld);
     mAgent2 = new SquareAgent(a2pos, a2col, modelVelMax, modelVelMin, modelMoveMax, modelMoveMin, false, mRenderable, mWorld);
+
+    //mWorld->setWorldUserInfo(this);
+    mWorld->setInternalTickCallback(tickCallBack, this);
 }
 
 void CompetitiveSimulation::shutdown()
@@ -91,6 +100,7 @@ void CompetitiveSimulation::shutdown()
 
 void CompetitiveSimulation::reset()
 {
+    mWorld->clearForces();
     mAgent1->reset();
     mAgent2->reset();
 }
@@ -99,6 +109,8 @@ void CompetitiveSimulation::cycle(vector<NeuralNetwork> brains, unsigned int cur
 {
     if(currentIteration > parameters.simulationCycles)
         return;
+
+    cout << "1: " << mAgent1->getPosition().x << " " << mAgent1->getPosition().y << " 2: " << mAgent2->getPosition().x << " " << mAgent2->getPosition().y << endl;
 
     if(currentIteration % parameters.cyclesPerDecision == 0)
     {
@@ -132,12 +144,21 @@ void CompetitiveSimulation::cycle(vector<NeuralNetwork> brains, unsigned int cur
         mAgent2->changeVelocity(accel2);
     }
 
-	mWorld->stepSimulation(1.f, 60);
+    if(mAgent1->getVelocity().x > 2 || mAgent1->getVelocity().x < -2)
+    {
+        cout << "VEL ERROR: " << mAgent1->getVelocity().x << endl;
+        int x;
+        cin >> x;
+    }
+
+	mWorld->stepSimulation(1.f, 10, 1/10.f);
 
     if(!mAgent1->getReached())
     {
         if(mAgent1->getPosition().x >= 1500)
+        {
             mAgent1->setReached(true);
+        }
     }
     
     if(!mAgent2->getReached())
@@ -155,6 +176,12 @@ void CompetitiveSimulation::cycle(vector<NeuralNetwork> brains, unsigned int cur
     }
 
     
+}
+
+void CompetitiveSimulation::conformVelocities()
+{
+    mAgent1->changeVelocity(vector2());
+    mAgent2->changeVelocity(vector2());
 }
 
 float CompetitiveSimulation::evaluateFitness()

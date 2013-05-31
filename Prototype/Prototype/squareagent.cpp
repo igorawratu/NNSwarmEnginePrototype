@@ -24,6 +24,8 @@ void SquareAgent::initPhys(vector2 position)
     mColShape->calculateLocalInertia(1, inertia);
 
     btRigidBody::btRigidBodyConstructionInfo consInf(1, motionState, mColShape, inertia);
+    consInf.m_restitution = 100.f;
+    consInf.m_friction = 0.f;
     mRigidBody = new btRigidBody(consInf);
     mRigidBody->setSleepingThresholds(0.f, mRigidBody->getAngularSleepingThreshold());
 
@@ -233,30 +235,33 @@ void SquareAgent::render(GLuint shadername)
     
 void SquareAgent::changeVelocity(vector2 acceleration)
 {
-    btVector3 newVel;
+    vector2 newVel;
     btVector3 velocity = mRigidBody->getLinearVelocity();
 
     if(velocity.getX() + acceleration.x > mVelMax.x)
-        newVel.setX(mVelMax.x);
+        newVel.x = mVelMax.x;
     else if(velocity.getX() + acceleration.x < mVelMin.x)
-        newVel.setX(mVelMin.x);
-    else newVel.setX(velocity.getX() + acceleration.x);
+        newVel.x = mVelMin.x;
+    else newVel.x = velocity.getX() + acceleration.x;
 
     if(velocity.getY() + acceleration.y > mVelMax.y)
-        newVel.setY(mVelMax.y);
+        newVel.y = mVelMax.y;
     else if(velocity.getY() + acceleration.y < mVelMin.y)
-        newVel.setY(mVelMin.y);
-    else newVel.setY(velocity.getY() + acceleration.y);
+        newVel.y = mVelMin.y;
+    else newVel.y = velocity.getY() + acceleration.y;
 
-    newVel.setZ(0.f);
-    newVel.setW(1.f);
-
-    mRigidBody->setLinearVelocity(newVel);
+    mRigidBody->setLinearVelocity(btVector3(newVel.x, newVel.y, 0.f));
 }
 
 void SquareAgent::reset()
 {
+    mWorld->removeRigidBody(mRigidBody);
+
     mRigidBody->setLinearVelocity(btVector3(0, 0, 0));
-    mRigidBody->getMotionState()->setWorldTransform(btTransform(btQuaternion(0, 0, 0, 1), btVector3(mInitPos.x, mInitPos.y, 0)));
+    mRigidBody->setAngularVelocity(btVector3(0, 0, 0));
+    mRigidBody->setWorldTransform(btTransform(btQuaternion(0, 0, 0, 1), btVector3(mInitPos.x, mInitPos.y, 0)));
+
     mReached = false;
+    
+    mWorld->addRigidBody(mRigidBody);
 }
