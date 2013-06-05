@@ -5,6 +5,7 @@
 #include "common.h"
 #include "squareagent.h"
 #include "lineobject.h"
+#include "bar.h"
 
 #include <iostream>
 #include <vector>
@@ -32,7 +33,7 @@ private:
     CompetitiveSimulation& operator=(const CompetitiveSimulation& other){}
 
 private:
-    vector<LineObject*> mIndicators;
+    vector<Bar*> mIndicators;
     SquareAgent* mAgent1;
     SquareAgent* mAgent2;
     int mWinner;
