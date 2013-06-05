@@ -235,22 +235,7 @@ void SquareAgent::render(GLuint shadername)
     
 void SquareAgent::changeVelocity(vector2 acceleration)
 {
-    vector2 newVel;
-    btVector3 velocity = mRigidBody->getLinearVelocity();
-
-    if(velocity.getX() + acceleration.x > mVelMax.x)
-        newVel.x = mVelMax.x;
-    else if(velocity.getX() + acceleration.x < mVelMin.x)
-        newVel.x = mVelMin.x;
-    else newVel.x = velocity.getX() + acceleration.x;
-
-    if(velocity.getY() + acceleration.y > mVelMax.y)
-        newVel.y = mVelMax.y;
-    else if(velocity.getY() + acceleration.y < mVelMin.y)
-        newVel.y = mVelMin.y;
-    else newVel.y = velocity.getY() + acceleration.y;
-
-    mRigidBody->setLinearVelocity(btVector3(newVel.x, newVel.y, 0.f));
+    mRigidBody->applyCentralForce(btVector3(acceleration.x, acceleration.y, 0));
 }
 
 void SquareAgent::reset()
