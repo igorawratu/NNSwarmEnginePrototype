@@ -27,7 +27,7 @@ vector<unsigned int> GA::getNumWeights()
     return counters;
 }
 
-vector<Chromosome> GA::initializePopulation(Simulation* simulation)
+vector<Chromosome> GA::initializePopulation(Simulation* simulation, int chromosomeGroup)
 {
     vector<Chromosome> population;
 
@@ -37,22 +37,47 @@ vector<Chromosome> GA::initializePopulation(Simulation* simulation)
 
     vector<unsigned int> numWeights = getNumWeights();
 
-    for(unsigned int k = 0; k < mParameters.GApopulation; k++)
+    if(chromosomeGroup < 0)
     {
-        vector<vector<float>> currChromosomeWeights;
-        for(unsigned int l = 0; l < numWeights.size(); l++)
+        for(unsigned int k = 0; k < mParameters.GApopulation; k++)
         {
-            vector<float> currnetweights;
-            for(unsigned int i = 0; i < numWeights[l]; i++)
-                currnetweights.push_back(genInitPos());
-            currChromosomeWeights.push_back(currnetweights);
+            vector<vector<float>> currChromosomeWeights;
+            for(unsigned int l = 0; l < numWeights.size(); l++)
+            {
+                vector<float> currnetweights;
+                for(unsigned int i = 0; i < numWeights[l]; i++)
+                    currnetweights.push_back(genInitPos());
+                currChromosomeWeights.push_back(currnetweights);
+            }
+
+            Chromosome currChromosome(mParameters.nnParameters);
+            currChromosome.mWeights = currChromosomeWeights;
+            currChromosome.mFitness = simulation->parameters.maxFitness;
+
+            population.push_back(currChromosome);
         }
+    }
+    else
+    {
+        for(unsigned int k = 0; k < mParameters.GApopulation; k++)
+        {
+            vector<vector<float>> currChromosomeWeights;
+            
+            vector<float> currnetweights;
+            for(unsigned int i = 0; i < numWeights[chromosomeGroup]; i++)
+                currnetweights.push_back(genInitPos());
+            
+            currChromosomeWeights.push_back(currnetweights);
 
-        Chromosome currChromosome(mParameters.nnParameters);
-        currChromosome.mWeights = currChromosomeWeights;
-        currChromosome.mFitness = simulation->parameters.maxFitness;
+            vector<NeuralNetworkParameter> parameters;
+            parameters.push_back(mParameters.nnParameters[chromosomeGroup]);
 
-        population.push_back(currChromosome);
+            Chromosome currChromosome(parameters);
+            currChromosome.mWeights = currChromosomeWeights;
+            currChromosome.mFitness = simulation->parameters.maxFitness;
+
+            population.push_back(currChromosome);
+        }
     }
 
     return population;
@@ -98,13 +123,13 @@ vector<Chromosome> GA::getParents(vector<Chromosome> population, unsigned int nu
     return parents;
 }
 
-vector<Chromosome> GA::gaussianCrossover(vector<Chromosome> population, float maxFitness)
+vector<Chromosome> GA::gaussianCrossover(vector<Chromosome> population, float maxFitness, vector<NeuralNetworkParameter> parameters)
 {
     vector<Chromosome> output;
 
     vector<Chromosome> parents = getParents(population, 2);
 
-    Chromosome child(mParameters.nnParameters);
+    Chromosome child(parameters);
     
     boost::mt19937 rng(rand());
     
@@ -130,13 +155,13 @@ vector<Chromosome> GA::gaussianCrossover(vector<Chromosome> population, float ma
     return output;
 }
 
-vector<Chromosome> GA::multipointCrossover(vector<Chromosome> population, float maxFitness)
+vector<Chromosome> GA::multipointCrossover(vector<Chromosome> population, float maxFitness, vector<NeuralNetworkParameter> parameters)
 {
     vector<Chromosome> output;
 
     vector<Chromosome> parents = getParents(population, 2);
 
-    Chromosome child(mParameters.nnParameters);
+    Chromosome child(parameters);
     
     boost::mt19937 rng(rand());
     boost::uniform_int<> multipointDist(0, 1);
@@ -159,12 +184,12 @@ vector<Chromosome> GA::multipointCrossover(vector<Chromosome> population, float 
     return output;
 }
 
-vector<Chromosome> GA::simplexCrossover(vector<Chromosome> population, float maxFitness)
+vector<Chromosome> GA::simplexCrossover(vector<Chromosome> population, float maxFitness, vector<NeuralNetworkParameter> parameters)
 {
     vector<Chromosome> output;
     vector<Chromosome> parents = getParents(population, 4);
 
-    Chromosome child(mParameters.nnParameters);
+    Chromosome child(parameters);
 
     quicksort(parents, 0, parents.size() - 1);
 
@@ -194,13 +219,13 @@ vector<Chromosome> GA::simplexCrossover(vector<Chromosome> population, float max
     return output;
 }
 
-vector<Chromosome> GA::singlepointCrossover(vector<Chromosome> population, float maxFitness)
+vector<Chromosome> GA::singlepointCrossover(vector<Chromosome> population, float maxFitness, vector<NeuralNetworkParameter> parameters)
 {
     vector<Chromosome> output;
 
     vector<Chromosome> parents = getParents(population, 2);
 
-    Chromosome child(mParameters.nnParameters);
+    Chromosome child(parameters);
     
     vector<vector<float>> weights;
 
@@ -226,13 +251,13 @@ vector<Chromosome> GA::singlepointCrossover(vector<Chromosome> population, float
     return output;
 }
 
-vector<Chromosome> GA::twopointCrossover(vector<Chromosome> population, float maxFitness)
+vector<Chromosome> GA::twopointCrossover(vector<Chromosome> population, float maxFitness, vector<NeuralNetworkParameter> parameters)
 {
     vector<Chromosome> output;
 
     vector<Chromosome> parents = getParents(population, 2);
 
-    Chromosome child(mParameters.nnParameters);
+    Chromosome child(parameters);
     
     vector<vector<float>> weights;
 
@@ -260,13 +285,13 @@ vector<Chromosome> GA::twopointCrossover(vector<Chromosome> population, float ma
     return output;
 }
 
-vector<Chromosome> GA::simulatedbinaryCrossover(vector<Chromosome> population, float maxFitness)
+vector<Chromosome> GA::simulatedbinaryCrossover(vector<Chromosome> population, float maxFitness, vector<NeuralNetworkParameter> parameters)
 {
     vector<Chromosome> output;
     
     vector<Chromosome> parents = getParents(population, 2);
-    Chromosome child1(mParameters.nnParameters); 
-    Chromosome child2(mParameters.nnParameters); 
+    Chromosome child1(parameters); 
+    Chromosome child2(parameters); 
     child1.mFitness = child2.mFitness = maxFitness;
 
     boost::mt19937 rng(rand());
@@ -299,29 +324,34 @@ vector<Chromosome> GA::simulatedbinaryCrossover(vector<Chromosome> population, f
     return output;
 }
 
-vector<Chromosome> GA::crossover(vector<Chromosome> population, float maxFitness)
+vector<Chromosome> GA::crossover(vector<Chromosome> population, float maxFitness, int chromosomeGroup)
 {
     vector<Chromosome> output;
+
+    vector<NeuralNetworkParameter> parameters;
+    if(chromosomeGroup < 0)
+        parameters = mParameters.nnParameters;
+    else parameters.push_back(mParameters.nnParameters[chromosomeGroup]);
 
     switch (mParameters.crossoverType)
     {
         case GAUSSIAN_CO: 
-            output = gaussianCrossover(population, maxFitness);
+            output = gaussianCrossover(population, maxFitness, parameters);
             break;
         case MULTIPOINT_CO: 
-            output = multipointCrossover(population, maxFitness);
+            output = multipointCrossover(population, maxFitness, parameters);
             break;
         case SIMPLEX_CO:
-            output = simplexCrossover(population, maxFitness);
+            output = simplexCrossover(population, maxFitness, parameters);
             break;
         case SINGLEPOINT_CO:
-            output = singlepointCrossover(population, maxFitness);
+            output = singlepointCrossover(population, maxFitness, parameters);
             break;
         case TWOPOINT_CO:
-            output = twopointCrossover(population, maxFitness);
+            output = twopointCrossover(population, maxFitness, parameters);
             break;
         case SIMULATEDBINARY_CO:
-            output = simulatedbinaryCrossover(population, maxFitness);
+            output = simulatedbinaryCrossover(population, maxFitness, parameters);
             break;
         default:
             break;
@@ -374,12 +404,12 @@ void GA::mutate(vector<Chromosome>& population)
     }
 }
 
-vector<NeuralNetwork> GA::train(Simulation* simulation, bool compete)
+vector<NeuralNetwork> GA::train(Simulation* simulation)
 {
     assert(mParameters.GApopulation > mParameters.elitismCount); 
 
     cout << "Initialising" << endl;
-    vector<Chromosome> population = initializePopulation(simulation);
+    vector<Chromosome> population = initializePopulation(simulation, -1);
     assert(population.size() > 0);
 
     cout << "Starting training: " << endl;
@@ -387,10 +417,8 @@ vector<NeuralNetwork> GA::train(Simulation* simulation, bool compete)
     for(unsigned int k = 0; k < mParameters.maxGenerations; k++)
     {
         cout << "Generation " << k << endl;
-        evaluatePopulation(population, simulation);
 
-        if(compete)
-            competePopulation(population);
+        evaluatePopulation(population, simulation);
 
         if(population[0].mFitness < mParameters.epsilon)
             return population[0].getBrains();
@@ -398,7 +426,7 @@ vector<NeuralNetwork> GA::train(Simulation* simulation, bool compete)
         vector<Chromosome> newPopulation = getFirst(population, mParameters.elitismCount);
         while(newPopulation.size() < population.size())
         {
-            vector<Chromosome> offspring = crossover(population, simulation->parameters.maxFitness);
+            vector<Chromosome> offspring = crossover(population, simulation->parameters.maxFitness, -1);
             newPopulation.insert(newPopulation.end(), offspring.begin(), offspring.end());
         }
 
@@ -413,8 +441,6 @@ vector<NeuralNetwork> GA::train(Simulation* simulation, bool compete)
     }
     evaluatePopulation(population, simulation);
 
-    
-
     return population[0].getBrains();
 }
 
@@ -428,41 +454,82 @@ vector<Chromosome> GA::getFirst(vector<Chromosome> population, unsigned int amou
     return output;
 }
 
-void GA::competePopulation(vector<Chromosome>& population)
+void GA::evaluateCompetitivePopulation(vector<vector<Chromosome>>& population, Simulation* simulation)
 {
-    float* fitnessList = new float[population.size()];
-    fill(fitnessList, fitnessList + population.size(), population.size() / 5);
+    //assume two for now
+    assert(population.size() == 2);
+    vector<Chromosome> competeSetOne = getParents(population[1], mParameters.GApopulation/5);
+    vector<Chromosome> competeSetTwo = getParents(population[0], mParameters.GApopulation/5);
 
-    for(int k = 0; k < population.size(); k++)
+    for(int i = 0; i < population[0].size(); i++)
     {
-        vector<Chromosome> copy = population;
-        copy.erase(copy.begin() + k);
-
-        unsigned int counter = 0;
-        while(counter < population.size() / 5)
+        for(int k = 0; k < competeSetOne.size(); k++)
         {
-            boost::mt19937 rng(rand());
-            boost::uniform_int<> dist(0, copy.size() - 1);
-            boost::variate_generator<boost::mt19937, boost::uniform_int<>> gen(rng, dist);
-            unsigned int pos = gen();
-
-            if(population[k].mFitness < copy[pos].mFitness)
-                fitnessList[k] -= 1;
-            
-            copy.erase(copy.begin() + pos);
-            counter++;
+            vector<NeuralNetwork> brains;
+            brains.push_back(population[0][i].getBrains()[0]);
+            brains.push_back(competeSetOne[k].getBrains()[0]);
+            simulation->fullRun(brains);
+            float winner = simulation->getWinner();
+            if(winner == 0)
+                population[0][i].mFitness -= 1;
         }
     }
 
-    for(int k = 0; k < population.size(); k++)
+    for(int i = 0; i < population[1].size(); i++)
     {
-        population[k].mFitness = fitnessList[k];
-        //cout << "Chromosome " << k << " with fitness " << fitnessList[k] << endl;
+        for(int k = 0; k < competeSetTwo.size(); k++)
+        {
+            vector<NeuralNetwork> brains;
+            brains.push_back(competeSetTwo[k].getBrains()[0]);
+            brains.push_back(population[1][i].getBrains()[0]);
+            simulation->fullRun(brains);
+            float winner = simulation->getWinner();
+            if(winner == 1)
+                population[1][i].mFitness -= 1;
+        }
     }
+    quicksort(population[0], 0, population[0].size() - 1);
+    quicksort(population[1], 0, population[1].size() - 1);
+}
 
-    delete[] fitnessList;
+void GA::competePopulation(Simulation* simulation)
+{   
+    assert(mParameters.GApopulation > mParameters.elitismCount); 
 
-    quicksort(population, 0, population.size() - 1);
+    vector<vector<Chromosome>> populations;
+    for(int k = 0; k < mParameters.nnParameters.size(); k++)
+        populations.push_back(initializePopulation(simulation, k));
+
+    for(unsigned int k = 0; k < mParameters.maxGenerations; k++)
+    {
+        cout << "Generation " << k << endl;
+
+        evaluateCompetitivePopulation(populations, simulation);
+        
+        for(int i = 0; i < mParameters.nnParameters.size(); i++)
+        {
+            vector<Chromosome> newPopulation = getFirst(populations[i], mParameters.elitismCount);
+            while(newPopulation.size() < populations[i].size())
+            {
+                vector<Chromosome> offspring = crossover(populations[i], simulation->parameters.maxFitness, i);
+                newPopulation.insert(newPopulation.end(), offspring.begin(), offspring.end());
+            }
+
+            while(newPopulation.size() > populations[i].size())
+                newPopulation.pop_back();
+
+            populations[i] = newPopulation;
+
+            mutate(populations[i]);
+
+            conformWeights(populations[i]);
+        }
+        
+    }
+    evaluateCompetitivePopulation(populations, simulation);
+    vector<NeuralNetwork> output;
+    for(int k = 0; k < populations.size(); k++)
+        output.push_back(populations[k][0].getBrains()[0]);
 }
 
 void GA::quicksort(vector<Chromosome>& elements, int left, int right)

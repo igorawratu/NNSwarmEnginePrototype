@@ -24,6 +24,7 @@ public:
     virtual float evaluateFitness();
     virtual void render(GLuint shadername);
     virtual void shutdown();
+    virtual float getWinner();
     void conformVelocities();
 
 private:
@@ -31,6 +32,7 @@ private:
     vector<float> makeDecision(NeuralNetwork& brain, vector<float>& inputs);
     CompetitiveSimulation(const CompetitiveSimulation& other){}
     CompetitiveSimulation& operator=(const CompetitiveSimulation& other){}
+    float getDistanceLeft(unsigned int agent);
 
 private:
     vector<Bar*> mIndicators;

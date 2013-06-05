@@ -216,36 +216,51 @@ void CompetitiveSimulation::conformVelocities()
     mAgent2->changeVelocity(vector2());
 }
 
+float CompetitiveSimulation::getDistanceLeft(unsigned int agent)
+{
+    SquareAgent* currAgent;
+    currAgent = (agent == 0) ? mAgent1 : mAgent2;
+
+    if(currAgent->getReached())
+        return 0;
+
+    vector2 pt1, pt2, pt3;
+    pt1.x = 1250; pt1.y = 150;
+    pt2.x = 1250; pt2.y = 650;
+    pt3.x = 200; pt3.y = 150;
+
+    float d12 = calcDistance(pt1, pt2);
+    float d23 = calcDistance(pt2, pt3);
+
+    float dist = 0.f;
+
+    if(currAgent->getPosition().y < 210)
+        dist = calcDistance(currAgent->getPosition(), pt1) + d12 + d23;
+    else if(currAgent->getPosition().y > 210 && currAgent->getPosition().y < 600)
+        dist = calcDistance(currAgent->getPosition(), pt2) + d23;
+    else dist = calcDistance(currAgent->getPosition(), pt3);
+
+    return dist;
+}
+
 float CompetitiveSimulation::evaluateFitness()
+{
+    float agent1Dist = getDistanceLeft(0);
+    float agent2Dist = getDistanceLeft(1);
+
+    return agent1Dist + agent2Dist;
+}
+
+float CompetitiveSimulation::getWinner()
 {
     if(mWinner != -1)
         return (float)mWinner;
     else
     {
-        float agent1Dist = 0.0f, agent2Dist = 0.0f;
-        vector2 pt1, pt2, pt3;
-        pt1.x = 1250; pt1.y = 150;
-        pt2.x = 1250; pt2.y = 650;
-        pt3.x = 200; pt3.y = 150;
-
-        float d12 = calcDistance(pt1, pt2);
-        float d23 = calcDistance(pt2, pt3);
-        
-        //calculate how far the first agent is
-        if(mAgent1->getPosition().y < 210)
-            agent1Dist = calcDistance(mAgent1->getPosition(), pt1) + d12 + d23;
-        else if(mAgent1->getPosition().y > 210 && mAgent1->getPosition().y < 600)
-            agent1Dist = calcDistance(mAgent1->getPosition(), pt2) + d23;
-        else agent1Dist = calcDistance(mAgent1->getPosition(), pt3);
-
-        //calculate how far the second agent is
-        if(mAgent2->getPosition().y < 210)
-            agent2Dist = calcDistance(mAgent2->getPosition(), pt1) + d12 + d23;
-        else if(mAgent2->getPosition().y > 210 && mAgent2->getPosition().y < 600)
-            agent2Dist = calcDistance(mAgent2->getPosition(), pt2) + d23;
-        else agent2Dist = calcDistance(mAgent2->getPosition(), pt3);
-
-        if(agent1Dist > agent2Dist)
+        float agent1Dist = getDistanceLeft(0);
+        float agent2Dist = getDistanceLeft(1);
+       
+        if(agent1Dist < agent2Dist)
             return 0.f;
         else return 1.f;
     }

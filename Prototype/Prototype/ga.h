@@ -41,30 +41,30 @@ public:
     GA& operator=(const GA& other);
     ~GA(){}
 
-    vector<NeuralNetwork> train(Simulation* simulation, bool compete);
+    vector<NeuralNetwork> train(Simulation* simulation);
     void setParameters(GAParams parameters){mParameters = parameters;};
 
 private:
     /* INIT */
-    vector<Chromosome> initializePopulation(Simulation* simulation);
+    vector<Chromosome> initializePopulation(Simulation* simulation, int chromosomeGroup);
 
     /* MUTATION */
     void mutate(vector<Chromosome>& population);
     
     /* CROSSOVER RELATED FUNCTIONS */
-    vector<Chromosome> crossover(vector<Chromosome> population, float maxFitness);
+    vector<Chromosome> crossover(vector<Chromosome> population, float maxFitness, int chromosomeGroup);
 
     //crossover helper
     vector<Chromosome> getParents(vector<Chromosome> population, unsigned int numParents);
     Chromosome selectParent(vector<Chromosome> population, unsigned int& rank);
 
     //crossover types
-    vector<Chromosome> gaussianCrossover(vector<Chromosome> population, float maxFitness);
-    vector<Chromosome> multipointCrossover(vector<Chromosome> population, float maxFitness);
-    vector<Chromosome> simplexCrossover(vector<Chromosome> population, float maxFitness);
-    vector<Chromosome> simulatedbinaryCrossover(vector<Chromosome> population, float maxFitness);
-    vector<Chromosome> singlepointCrossover(vector<Chromosome> population, float maxFitness);
-    vector<Chromosome> twopointCrossover(vector<Chromosome> population, float maxFitness);
+    vector<Chromosome> gaussianCrossover(vector<Chromosome> population, float maxFitness, vector<NeuralNetworkParameter> parameters);
+    vector<Chromosome> multipointCrossover(vector<Chromosome> population, float maxFitness, vector<NeuralNetworkParameter> parameters);
+    vector<Chromosome> simplexCrossover(vector<Chromosome> population, float maxFitness, vector<NeuralNetworkParameter> parameters);
+    vector<Chromosome> simulatedbinaryCrossover(vector<Chromosome> population, float maxFitness, vector<NeuralNetworkParameter> parameters);
+    vector<Chromosome> singlepointCrossover(vector<Chromosome> population, float maxFitness, vector<NeuralNetworkParameter> parameters);
+    vector<Chromosome> twopointCrossover(vector<Chromosome> population, float maxFitness, vector<NeuralNetworkParameter> parameters);
 
     /* MISC */
 
@@ -74,7 +74,8 @@ private:
     void quicksort(vector<Chromosome>& elements, int left, int right);
     void conformWeights(vector<Chromosome>& population);
     void evaluatePopulation(vector<Chromosome>& population, Simulation* simulation);
-    void competePopulation(vector<Chromosome>& population);
+    void competePopulation(Simulation* simulation);
+    void evaluateCompetitivePopulation(vector<vector<Chromosome>>& population, Simulation* simulation);
 
 private:
     GAParams mParameters;

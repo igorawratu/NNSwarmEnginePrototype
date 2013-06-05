@@ -38,6 +38,7 @@ public:
     virtual float evaluateFitness();
     virtual void render(GLuint shadername);
     virtual void shutdown();
+    virtual float getWinner(){return -1;}
 
 private:
     float calcDistance(vector2 from, vector2 to);

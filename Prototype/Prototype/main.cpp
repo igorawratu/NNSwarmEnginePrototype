@@ -49,7 +49,7 @@ vector<NeuralNetworkParameter> getNNParameters()
         NeuralNetworkParameter currParam;
         currParam.hiddenNodes = 4;
         currParam.outputNodes = 2;
-        currParam.inputNodes = 3;
+        currParam.inputNodes = 8;
         params.push_back(currParam);
     }
 
@@ -85,7 +85,7 @@ vector<NeuralNetwork> train()
 {
     CompetitiveSimulation sim(getSimParams(), false);
     GA ga(getGAParams());
-    return ga.train(&sim, false);
+    return ga.train(&sim);
 }
 
 void writeResults(vector<NeuralNetwork> results)
