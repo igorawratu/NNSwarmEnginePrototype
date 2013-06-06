@@ -28,7 +28,7 @@ void Bar::initPhysics(vector2 pos1, vector2 pos2, vector2 pos3, vector2 pos4)
 
     btRigidBody::btRigidBodyConstructionInfo consInf(0, motionState, mColShape, inertia);
     mRigidBody = new btRigidBody(consInf);
-    mRigidBody->setSleepingThresholds(0.f, mRigidBody->getAngularSleepingThreshold());
+    mRigidBody->setCollisionFlags(btCollisionObject::CF_STATIC_OBJECT);
 
     mWorld->addRigidBody(mRigidBody);
 }

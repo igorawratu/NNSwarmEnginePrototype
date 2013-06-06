@@ -64,7 +64,7 @@ CompetitiveSimulation::CompetitiveSimulation(SimulationParams parameters, bool r
     mAgent1 = new SquareAgent(a1pos, a1col, modelVelMax, modelVelMin, modelMoveMax, modelMoveMin, false, mRenderable, mWorld);
     mAgent2 = new SquareAgent(a2pos, a2col, modelVelMax, modelVelMin, modelMoveMax, modelMoveMin, false, mRenderable, mWorld);
 
-    mWorld->setInternalTickCallback(tickCallBack, this);
+    mWorld->setInternalTickCallback(tickCallBack, this, true);
 }
 
 void CompetitiveSimulation::shutdown()
@@ -96,12 +96,15 @@ void CompetitiveSimulation::reset()
     mWorld->clearForces();
     mAgent1->reset();
     mAgent2->reset();
+    mWinner = -1;
 }
 
 void CompetitiveSimulation::cycle(vector<NeuralNetwork> brains, unsigned int currentIteration)
 {
     if(currentIteration > parameters.simulationCycles)
         return;
+
+    mWorld->stepSimulation(1.f, 15, 1/15.f);
 
     if(currentIteration % parameters.cyclesPerDecision == 0)
     {
@@ -117,8 +120,9 @@ void CompetitiveSimulation::cycle(vector<NeuralNetwork> brains, unsigned int cur
         a1inputs.push_back(a1x); a1inputs.push_back(a1y);
         a1inputs.push_back(mAgent1->getVelocity().x/2); a1inputs.push_back(mAgent1->getVelocity().y/2);
 
-        btVector3 a1FromTop(a1x, a1y - 10, 0), a1FromBot(a1x, a1y + 10, 0), a1FromRight(a1x + 10, a1y, 0), a1FromLeft(a1x - 10, a1y, 0);
-        btVector3 a1ToTop(a1x, 0, 0), a1ToBot(a1x, 1000, 0), a1ToRight(2000, a1y, 0), a1ToLeft(0, a1y, 0);
+        btVector3 a1FromTop(mAgent1->getPosition().x, mAgent1->getPosition().y - 10, 0), a1FromBot(mAgent1->getPosition().x, mAgent1->getPosition().y + 10, 0), 
+            a1FromRight(mAgent1->getPosition().x + 10, mAgent1->getPosition().y, 0), a1FromLeft(mAgent1->getPosition().x- 10, mAgent1->getPosition().y, 0);
+        btVector3 a1ToTop(mAgent1->getPosition().x, 0, 0), a1ToBot(mAgent1->getPosition().x, 1000, 0), a1ToRight(2000, mAgent1->getPosition().y, 0), a1ToLeft(0, mAgent1->getPosition().y, 0);
 
         btCollisionWorld::ClosestRayResultCallback a1Top(a1FromTop,a1ToTop);
         btCollisionWorld::ClosestRayResultCallback a1Bot(a1FromBot,a1ToBot);
@@ -141,13 +145,13 @@ void CompetitiveSimulation::cycle(vector<NeuralNetwork> brains, unsigned int cur
         a1inputs.push_back(calcDistance(mAgent1->getPosition(), a1p3)/1600);
         a1inputs.push_back(calcDistance(mAgent1->getPosition(), a1p4)/1600);
 
-
         //agent 2 inputs
         a2inputs.push_back(a2x); a2inputs.push_back(a2y);
         a2inputs.push_back(mAgent2->getVelocity().x/2); a2inputs.push_back(mAgent2->getVelocity().y/2);
 
-        btVector3 a2FromTop(a2x, a2y - 10, 0), a2FromBot(a2x, a2y + 10, 0), a2FromRight(a2x + 10, a2y, 0), a2FromLeft(a2x - 10, a2y, 0);
-        btVector3 a2ToTop(a2x, 0, 0), a2ToBot(a2x, 1000, 0), a2ToRight(2000, a2y, 0), a2ToLeft(0, a2y, 0);
+        btVector3 a2FromTop(mAgent2->getPosition().x, mAgent2->getPosition().y - 10, 0), a2FromBot(mAgent2->getPosition().x, mAgent2->getPosition().y + 10, 0), 
+            a2FromRight(mAgent2->getPosition().x + 10, mAgent2->getPosition().y, 0), a2FromLeft(mAgent2->getPosition().x - 10, mAgent2->getPosition().y, 0);
+        btVector3 a2ToTop(mAgent2->getPosition().x, 0, 0), a2ToBot(mAgent2->getPosition().x, 1000, 0), a2ToRight(2000, mAgent2->getPosition().y, 0), a2ToLeft(0, mAgent2->getPosition().y, 0);
 
         btCollisionWorld::ClosestRayResultCallback a2Top(a2FromTop,a2ToTop);
         btCollisionWorld::ClosestRayResultCallback a2Bot(a2FromBot,a2ToBot);
@@ -187,8 +191,6 @@ void CompetitiveSimulation::cycle(vector<NeuralNetwork> brains, unsigned int cur
         mAgent2->changeVelocity(accel2);
     }
 
-	mWorld->stepSimulation(1.f, 1, 1.f);
-
     if(!mAgent1->getReached())
     {
         if(mAgent1->getPosition().x < 220 && mAgent1->getPosition().y > 550)
@@ -212,8 +214,8 @@ void CompetitiveSimulation::cycle(vector<NeuralNetwork> brains, unsigned int cur
 
 void CompetitiveSimulation::conformVelocities()
 {
-    mAgent1->changeVelocity(vector2());
-    mAgent2->changeVelocity(vector2());
+    mAgent1->conformVelocities();
+    mAgent2->conformVelocities();
 }
 
 float CompetitiveSimulation::getDistanceLeft(unsigned int agent)
@@ -263,7 +265,6 @@ float CompetitiveSimulation::getWinner()
         float outVal;
        
         outVal = (agent1Dist < agent2Dist) ? 0.f : 1.f;
-        cout << agent1Dist << " " << agent2Dist << endl;
         
         return outVal;
     }
@@ -271,6 +272,11 @@ float CompetitiveSimulation::getWinner()
 
 void CompetitiveSimulation::render(GLuint shadername)
 {
+    /*vector2 accel;
+    accel.x = 1;
+    mAgent1->changeVelocity(accel);
+    mWorld->stepSimulation(1.f, 15, 1/15.f);*/
+
     for(unsigned int k = 0; k < mIndicators.size(); k++)
         mIndicators[k]->render(shadername);
 

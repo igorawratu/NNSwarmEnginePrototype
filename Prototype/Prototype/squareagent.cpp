@@ -17,19 +17,43 @@ void SquareAgent::initPhys(vector2 position)
 
     btMotionState* motionState;
 
-    mColShape = new btBox2dShape(btVector3(5, 5, 0));
+    btVector3 points[4] = {btVector3(-5.0f, 5.0f, 0), btVector3(-5.0f, -5.0f, 0), btVector3(5.0f, -5.0f, 0), btVector3(5.0f, 5.0f, 0)};
+
+    btConvexShape* childShape = new btConvexHullShape(&points[0].getX(), 4);
+    mColShape = new btConvex2dShape(childShape);
+
     motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(position.x, position.y, 0)));
     
     btVector3 inertia(0, 0, 0);
     mColShape->calculateLocalInertia(1, inertia);
 
     btRigidBody::btRigidBodyConstructionInfo consInf(1, motionState, mColShape, inertia);
-    consInf.m_restitution = 100.f;
-    consInf.m_friction = 0.f;
+    consInf.m_restitution = 10.f;
+    consInf.m_friction = 1.f;
     mRigidBody = new btRigidBody(consInf);
     mRigidBody->setSleepingThresholds(0.f, mRigidBody->getAngularSleepingThreshold());
 
     mWorld->addRigidBody(mRigidBody);
+}
+
+void SquareAgent::conformVelocities()
+{
+    vector2 newVel;
+    btVector3 velocity = mRigidBody->getLinearVelocity();
+
+    if(velocity.getX() > mVelMax.x)
+        newVel.x = mVelMax.x;
+    else if(velocity.getX() < mVelMin.x)
+        newVel.x = mVelMin.x;
+    else newVel.x = velocity.getX();
+
+    if(velocity.getY() > mVelMax.y)
+        newVel.y = mVelMax.y;
+    else if(velocity.getY() < mVelMin.y)
+        newVel.y = mVelMin.y;
+    else newVel.y = velocity.getY();
+
+    mRigidBody->setLinearVelocity(btVector3(newVel.x, newVel.y, 0.f));
 }
 
 SquareAgent::SquareAgent(vector2 position, vector4 colour, vector2 velMax, vector2 velMin, vector2 moveMax, vector2 moveMin, bool boundsCheck, bool renderable, btDiscreteDynamicsWorld* world) : Object(renderable, world)
@@ -240,13 +264,12 @@ void SquareAgent::changeVelocity(vector2 acceleration)
 
 void SquareAgent::reset()
 {
-    mWorld->removeRigidBody(mRigidBody);
-
+    mRigidBody->clearForces();
     mRigidBody->setLinearVelocity(btVector3(0, 0, 0));
     mRigidBody->setAngularVelocity(btVector3(0, 0, 0));
-    mRigidBody->setWorldTransform(btTransform(btQuaternion(0, 0, 0, 1), btVector3(mInitPos.x, mInitPos.y, 0)));
+    btTransform transform = mRigidBody->getCenterOfMassTransform();
+    transform.setOrigin(btVector3(mInitPos.x, mInitPos.y, 0));
+    mRigidBody->setCenterOfMassTransform(transform);
 
     mReached = false;
-    
-    mWorld->addRigidBody(mRigidBody);
 }

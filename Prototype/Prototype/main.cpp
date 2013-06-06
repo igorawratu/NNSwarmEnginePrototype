@@ -35,7 +35,7 @@ SimulationParams getSimParams()
     params.modelGroups = 2;
     params.simulationCycles = 1000;
     params.cyclesPerDecision = 10;
-    params.maxFitness = 3000;
+    params.maxFitness = 10;
 
     return params;
 }

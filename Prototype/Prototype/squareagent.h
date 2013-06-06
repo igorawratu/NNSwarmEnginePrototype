@@ -11,6 +11,7 @@
 
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionShapes/btBox2dShape.h>
+#include "BulletCollision/CollisionShapes/btConvex2dShape.h"
 
 class SquareAgent: public Object
 {
@@ -47,6 +48,7 @@ public:
     }
     void setReached(bool reached){mReached = reached;}
     bool getReached(){return mReached;}
+    void conformVelocities();
 
 private:
     SquareAgent(){}

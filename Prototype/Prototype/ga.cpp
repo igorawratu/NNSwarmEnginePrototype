@@ -461,10 +461,13 @@ void GA::evaluateCompetitivePopulation(vector<vector<Chromosome>>& population, S
     vector<Chromosome> competeSetOne = getParents(population[1], mParameters.GApopulation/5);
     vector<Chromosome> competeSetTwo = getParents(population[0], mParameters.GApopulation/5);
 
+    cout << "training population 1" << endl;
     for(int i = 0; i < population[0].size(); i++)
     {
+        cout << "training chromosome " << i << endl;
         for(int k = 0; k < competeSetOne.size(); k++)
         {
+            cout << "evaluating competition " << k << endl;
             vector<NeuralNetwork> brains;
             brains.push_back(population[0][i].getBrains()[0]);
             brains.push_back(competeSetOne[k].getBrains()[0]);
@@ -472,13 +475,17 @@ void GA::evaluateCompetitivePopulation(vector<vector<Chromosome>>& population, S
             float winner = simulation->getWinner();
             if(winner == 0)
                 population[0][i].mFitness -= 1;
+            simulation->reset();
         }
     }
 
+    cout << "training population 2" << endl;
     for(int i = 0; i < population[1].size(); i++)
     {
+        cout << "training chromosome " << i << endl;
         for(int k = 0; k < competeSetTwo.size(); k++)
         {
+            cout << "evaluating competition " << k << endl;
             vector<NeuralNetwork> brains;
             brains.push_back(competeSetTwo[k].getBrains()[0]);
             brains.push_back(population[1][i].getBrains()[0]);
@@ -486,6 +493,7 @@ void GA::evaluateCompetitivePopulation(vector<vector<Chromosome>>& population, S
             float winner = simulation->getWinner();
             if(winner == 1)
                 population[1][i].mFitness -= 1;
+            simulation->reset();
         }
     }
     quicksort(population[0], 0, population[0].size() - 1);
@@ -496,12 +504,17 @@ vector<NeuralNetwork> GA::competePopulation(Simulation* simulation)
 {   
     assert(mParameters.GApopulation > mParameters.elitismCount); 
 
+    unsigned long lastTime = time(0);
+
     vector<vector<Chromosome>> populations;
     for(int k = 0; k < mParameters.nnParameters.size(); k++)
         populations.push_back(initializePopulation(simulation, k));
 
     for(unsigned int k = 0; k < mParameters.maxGenerations; k++)
     {
+        cout << "TIME ELAPSED SINCE LAST GENERATION: " << time(0) - lastTime << endl;
+        lastTime = time(0);
+
         cout << "Generation " << k << endl;
 
         evaluateCompetitivePopulation(populations, simulation);
