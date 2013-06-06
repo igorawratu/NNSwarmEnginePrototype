@@ -62,7 +62,7 @@ GAParams getGAParams()
     parameters.GApopulation = 50;
     parameters.searchSpaceMax = 1.f;
     parameters.searchSpaceMin = -1.f;
-    parameters.maxGenerations = 100;
+    parameters.maxGenerations = 1;
     parameters.elitismCount = 5;
     parameters.mutationProb = 0.1f;
     parameters.epsilon = 1.f;

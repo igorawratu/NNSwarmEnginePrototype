@@ -75,7 +75,7 @@ private:
     void quicksort(vector<Chromosome>& elements, int left, int right);
     void conformWeights(vector<Chromosome>& population);
     void evaluatePopulation(vector<Chromosome>& population, Simulation* simulation);
-    void evaluateCompetitivePopulation(vector<vector<Chromosome>>& population, Simulation* simulation);
+    void evaluateCompetitivePopulation(vector<vector<Chromosome>>& population, Simulation* simulation, bool fullSim);
 
 private:
     GAParams mParameters;
