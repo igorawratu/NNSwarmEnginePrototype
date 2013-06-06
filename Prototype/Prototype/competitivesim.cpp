@@ -51,8 +51,8 @@ CompetitiveSimulation::CompetitiveSimulation(SimulationParams parameters, bool r
     a1col.r = 0; a2col.r = 1.0f;
     a1col.b = 1.0f; a2col.b = 0.0f;
     a1col.a = a2col.a = 1.0f;
-    a1pos.x = 100; a1pos.y = 400;
-    a2pos.x = 100; a2pos.y = 420;
+    a1pos.x = 250; a1pos.y = 130;
+    a2pos.x = 250; a2pos.y = 150;
     modelVelMax.x = 2.0f;
     modelVelMax.y = 2.0f;
     modelVelMin.x = -2.0f;
@@ -259,10 +259,13 @@ float CompetitiveSimulation::getWinner()
     {
         float agent1Dist = getDistanceLeft(0);
         float agent2Dist = getDistanceLeft(1);
+
+        float outVal;
        
-        if(agent1Dist < agent2Dist)
-            return 0.f;
-        else return 1.f;
+        outVal = (agent1Dist < agent2Dist) ? 0.f : 1.f;
+        cout << agent1Dist << " " << agent2Dist << endl;
+        
+        return outVal;
     }
 }
 

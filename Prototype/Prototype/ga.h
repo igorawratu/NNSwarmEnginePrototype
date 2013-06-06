@@ -42,6 +42,7 @@ public:
     ~GA(){}
 
     vector<NeuralNetwork> train(Simulation* simulation);
+    vector<NeuralNetwork> competePopulation(Simulation* simulation);
     void setParameters(GAParams parameters){mParameters = parameters;};
 
 private:
@@ -74,7 +75,6 @@ private:
     void quicksort(vector<Chromosome>& elements, int left, int right);
     void conformWeights(vector<Chromosome>& population);
     void evaluatePopulation(vector<Chromosome>& population, Simulation* simulation);
-    void competePopulation(Simulation* simulation);
     void evaluateCompetitivePopulation(vector<vector<Chromosome>>& population, Simulation* simulation);
 
 private:

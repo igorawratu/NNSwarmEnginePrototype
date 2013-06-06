@@ -492,7 +492,7 @@ void GA::evaluateCompetitivePopulation(vector<vector<Chromosome>>& population, S
     quicksort(population[1], 0, population[1].size() - 1);
 }
 
-void GA::competePopulation(Simulation* simulation)
+vector<NeuralNetwork> GA::competePopulation(Simulation* simulation)
 {   
     assert(mParameters.GApopulation > mParameters.elitismCount); 
 
@@ -530,6 +530,8 @@ void GA::competePopulation(Simulation* simulation)
     vector<NeuralNetwork> output;
     for(int k = 0; k < populations.size(); k++)
         output.push_back(populations[k][0].getBrains()[0]);
+
+    return output;
 }
 
 void GA::quicksort(vector<Chromosome>& elements, int left, int right)
