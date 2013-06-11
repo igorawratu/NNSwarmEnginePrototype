@@ -28,10 +28,11 @@ void SquareAgent::initPhys(vector2 position)
     mColShape->calculateLocalInertia(1, inertia);
 
     btRigidBody::btRigidBodyConstructionInfo consInf(1, motionState, mColShape, inertia);
-    consInf.m_restitution = 1.f;
-    consInf.m_friction = 1.f;
+    /*consInf.m_restitution = 0.f;
+    consInf.m_friction = 1.f;*/
     mRigidBody = new btRigidBody(consInf);
     mRigidBody->setSleepingThresholds(0.f, mRigidBody->getAngularSleepingThreshold());
+    mRigidBody->setLinearFactor(btVector3(1, 1, 0));
 
     mWorld->addRigidBody(mRigidBody);
 }

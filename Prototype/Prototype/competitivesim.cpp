@@ -286,8 +286,16 @@ void CompetitiveSimulation::render(GLuint shadername)
 
 float CompetitiveSimulation::calcDistance(vector2 from, vector2 to)
 {
-	float x = from.x - to.x;
+    float fx = from.x, tx = to.x;
+    if(fx > 2000 || fx < -2000) fx = 0;
+    if(tx > 2000 || tx < -2000) tx = 0;
+	float x = fx - tx;
+
+    float fy = from.y, ty = to.y;
+    if(fy > 2000 || fy < -2000) fy = 0;
+    if(ty > 2000 || ty < -2000) ty = 0;
 	float y = from.y - to.y;
+
 	return sqrt(x*x + y*y);
 }
 
