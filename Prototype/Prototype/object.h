@@ -25,6 +25,7 @@ public:
         mWorld = world;
         mColShape = 0;
         mRigidBody = 0;
+        mChildShape = 0;
     }
 
     virtual ~Object()
@@ -48,6 +49,11 @@ public:
             
             delete mRigidBody;
             mRigidBody = 0;
+        }
+        if(mChildShape)
+        {
+            delete mChildShape;
+            mChildShape = 0;
         }
     }
     
@@ -79,6 +85,7 @@ protected:
     btDiscreteDynamicsWorld* mWorld;
     btCollisionShape* mColShape;
     btRigidBody* mRigidBody;
+    btConvexShape* mChildShape;
 
     GLuint mVbname, mIbname;
     bool mRenderable;

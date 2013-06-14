@@ -35,7 +35,7 @@ SimulationParams getSimParams()
     params.modelGroups = 2;
     params.simulationCycles = 2000;
     params.cyclesPerDecision = 10;
-    params.maxFitness = 10000;
+    params.maxFitness = 10;
 
     return params;
 }
@@ -65,7 +65,7 @@ GAParams getGAParams()
     parameters.maxGenerations = 100;
     parameters.elitismCount = 5;
     parameters.mutationProb = 0.1f;
-    parameters.epsilon = 1.f;
+    parameters.epsilon = 0.f;
     parameters.crossoverType = MULTIPOINT_CO;
     parameters.nnParameters = getNNParameters();
 
@@ -83,10 +83,9 @@ unsigned int initShader(Renderer& renderer)
 
 vector<NeuralNetwork> train()
 {
-    CompetitiveSimulation sim(getSimParams(), false);
     GA ga(getGAParams());
-    //return ga.competePopulation(&sim);
-    return ga.train(&sim);
+    return ga.competePopulation(getSimParams());
+    //return ga.train(getSimParams());
 }
 
 void writeResults(vector<NeuralNetwork> results)
@@ -106,15 +105,15 @@ void writeResults(vector<NeuralNetwork> results)
 
 int main(int argc, char* args[]) 
 {
-    /*srand(time(0));
+    srand(time(0));
     vector<NeuralNetwork> brains = train();
     writeResults(brains);
 
     cout << "Training Complete" << endl;
     int x;
-    cin >> x;*/
+    cin >> x;
 
-    float nn1arr[] = {0.118223, 0.199073, 0.400197, -0.672227, -0.224726, -0.573016, 0.759209, 0.890996, -0.484141, -0.207504, 0.655275, 0.341233, 0.0326525, -0.720563, 0.0395124, -0.42473, 0.346363, -0.567209, 0.146231, -0.222695, 0.767896, 0.212944, -0.783179, 0.125823, 0.419294, 0.847271, 0.0422829, 0.871248, -0.505691, 0.662619, -0.626254, 0.285511, 0.660648, 0.964871, -0.0652884, -0.177082, -0.388488, -0.962087, -0.480175, -0.731391, 0.570392, -0.214177, -0.00571135, -0.570746, -0.658133, -0.0017751};
+    /*float nn1arr[] = {0.118223, 0.199073, 0.400197, -0.672227, -0.224726, -0.573016, 0.759209, 0.890996, -0.484141, -0.207504, 0.655275, 0.341233, 0.0326525, -0.720563, 0.0395124, -0.42473, 0.346363, -0.567209, 0.146231, -0.222695, 0.767896, 0.212944, -0.783179, 0.125823, 0.419294, 0.847271, 0.0422829, 0.871248, -0.505691, 0.662619, -0.626254, 0.285511, 0.660648, 0.964871, -0.0652884, -0.177082, -0.388488, -0.962087, -0.480175, -0.731391, 0.570392, -0.214177, -0.00571135, -0.570746, -0.658133, -0.0017751};
     float nn2arr[] = {-0.76186, 0.873296, -0.951288, 0.456168, 0.631245, 0.816111, -0.66221, 0.711367, -0.570166, 0.884509, 0.520178, -0.449114, 0.734121, 0.882006, 0.961864, 0.51835, -0.249509, -0.0778012, -0.351222, -0.897363, 0.0242707, 0.810249, -0.455638, 0.600291, -0.553491, 0.0271124, -0.398036, -0.29852, -0.609456, 0.616675, -0.552414, 0.0645907, 0.399582, 0.404971, -0.498802, -0.73881, -0.153411, -0.632186, 0.698871, 0.686499, 0.205683, -0.217769, 0.669692, 0.707619, -0.187549, 0.550651};
 
     vector<NeuralNetworkParameter> nnparams = getNNParameters();
@@ -128,7 +127,7 @@ int main(int argc, char* args[])
 
     vector<NeuralNetwork> brains;
     brains.push_back(net1);
-    brains.push_back(net2);
+    brains.push_back(net2);*/
 
 
     Renderer renderer;

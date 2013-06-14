@@ -19,8 +19,8 @@ void SquareAgent::initPhys(vector2 position)
 
     btVector3 points[4] = {btVector3(-5.0f, 5.0f, 0), btVector3(-5.0f, -5.0f, 0), btVector3(5.0f, -5.0f, 0), btVector3(5.0f, 5.0f, 0)};
 
-    btConvexShape* childShape = new btConvexHullShape(&points[0].getX(), 4);
-    mColShape = new btConvex2dShape(childShape);
+    mChildShape = new btConvexHullShape(&points[0].getX(), 4);
+    mColShape = new btConvex2dShape(mChildShape);
 
     motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(position.x, position.y, 0)));
     
@@ -41,20 +41,34 @@ void SquareAgent::conformVelocities()
 {
     vector2 newVel;
     btVector3 velocity = mRigidBody->getLinearVelocity();
+    bool update = false;
 
     if(velocity.getX() > mVelMax.x)
+    {
+        update = true;
         newVel.x = mVelMax.x;
+    }
     else if(velocity.getX() < mVelMin.x)
+    {
+        update = true;
         newVel.x = mVelMin.x;
+    }
     else newVel.x = velocity.getX();
 
     if(velocity.getY() > mVelMax.y)
+    {
+        update = true;
         newVel.y = mVelMax.y;
+    }
     else if(velocity.getY() < mVelMin.y)
+    {
+        update = true;
         newVel.y = mVelMin.y;
+    } 
     else newVel.y = velocity.getY();
 
-    mRigidBody->setLinearVelocity(btVector3(newVel.x, newVel.y, 0.f));
+    if(update)
+        mRigidBody->setLinearVelocity(btVector3(newVel.x, newVel.y, 0.f));
 }
 
 SquareAgent::SquareAgent(vector2 position, vector4 colour, vector2 velMax, vector2 velMin, vector2 moveMax, vector2 moveMin, bool boundsCheck, bool renderable, btDiscreteDynamicsWorld* world) : Object(renderable, world)

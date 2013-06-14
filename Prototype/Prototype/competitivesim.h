@@ -10,6 +10,8 @@
 #include <iostream>
 #include <vector>
 #include <omp.h>
+#include <limits>
+#include <math.h>
 
 using namespace std;
 
@@ -33,6 +35,7 @@ private:
     CompetitiveSimulation(const CompetitiveSimulation& other){}
     CompetitiveSimulation& operator=(const CompetitiveSimulation& other){}
     float getDistanceLeft(unsigned int agent);
+    void CompetitiveSimulation::clearPhysicsMetadata();
 
 private:
     vector<Bar*> mIndicators;

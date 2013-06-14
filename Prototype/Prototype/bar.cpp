@@ -18,8 +18,8 @@ void Bar::initPhysics(vector2 pos1, vector2 pos2, vector2 pos3, vector2 pos4)
     btMotionState* motionState;
     btVector3 points[4] = {btVector3(pos1.x, pos1.y, 0), btVector3(pos2.x, pos2.y, 0), btVector3(pos3.x, pos3.y, 0), btVector3(pos4.x, pos4.y, 0)};
 
-    btConvexShape* childShape = new btConvexHullShape(&points[0].getX(), 4);
-    mColShape = new btConvex2dShape(childShape);
+    mChildShape = new btConvexHullShape(&points[0].getX(), 4);
+    mColShape = new btConvex2dShape(mChildShape);
 
     motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, 0)));
     
@@ -32,7 +32,6 @@ void Bar::initPhysics(vector2 pos1, vector2 pos2, vector2 pos3, vector2 pos4)
     consInf.m_friction = 0.5f;*/
 
     mRigidBody = new btRigidBody(consInf);
-    //mRigidBody->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
     mRigidBody->activate(true);
 
     mWorld->addRigidBody(mRigidBody);

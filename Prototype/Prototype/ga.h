@@ -13,6 +13,7 @@
 #include "simulation.h"
 #include "neuralnetwork.h"
 #include "chromosome.h"
+#include "competitivesim.h"
 
 using namespace std;
 
@@ -41,13 +42,13 @@ public:
     GA& operator=(const GA& other);
     ~GA(){}
 
-    vector<NeuralNetwork> train(Simulation* simulation);
-    vector<NeuralNetwork> competePopulation(Simulation* simulation);
+    vector<NeuralNetwork> train(SimulationParams simParams);
+    vector<NeuralNetwork> competePopulation(SimulationParams simParams);
     void setParameters(GAParams parameters){mParameters = parameters;};
 
 private:
     /* INIT */
-    vector<Chromosome> initializePopulation(Simulation* simulation, int chromosomeGroup);
+    vector<Chromosome> initializePopulation(SimulationParams simParams, int chromosomeGroup);
 
     /* MUTATION */
     void mutate(vector<Chromosome>& population);
@@ -74,8 +75,8 @@ private:
     vector<Chromosome> getFirst(vector<Chromosome> population, unsigned int amount);
     void quicksort(vector<Chromosome>& elements, int left, int right);
     void conformWeights(vector<Chromosome>& population);
-    void evaluatePopulation(vector<Chromosome>& population, Simulation* simulation);
-    void evaluateCompetitivePopulation(vector<vector<Chromosome>>& population, Simulation* simulation, bool fullSim);
+    void evaluatePopulation(vector<Chromosome>& population, SimulationParams simParams);
+    void evaluateCompetitivePopulation(vector<vector<Chromosome>>& population, SimulationParams simParams, bool fullSim);
 
 private:
     GAParams mParameters;
