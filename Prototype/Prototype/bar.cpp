@@ -28,8 +28,8 @@ void Bar::initPhysics(vector2 pos1, vector2 pos2, vector2 pos3, vector2 pos4)
 
     btRigidBody::btRigidBodyConstructionInfo consInf(0, motionState, mColShape, inertia);
 
-    /*consInf.m_restitution = 0.f;
-    consInf.m_friction = 0.5f;*/
+    consInf.m_restitution = 0.5f;
+    consInf.m_friction = 0.5f;
 
     mRigidBody = new btRigidBody(consInf);
     mRigidBody->activate(true);
