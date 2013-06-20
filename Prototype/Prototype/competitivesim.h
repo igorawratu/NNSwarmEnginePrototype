@@ -35,7 +35,6 @@ private:
     CompetitiveSimulation(const CompetitiveSimulation& other){}
     CompetitiveSimulation& operator=(const CompetitiveSimulation& other){}
     float getDistanceLeft(unsigned int agent);
-    void CompetitiveSimulation::clearPhysicsMetadata();
 
 private:
     vector<Bar*> mIndicators;

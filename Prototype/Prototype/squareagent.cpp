@@ -21,6 +21,7 @@ void SquareAgent::initPhys(vector2 position)
 
     mChildShape = new btConvexHullShape(&points[0].getX(), 4);
     mColShape = new btConvex2dShape(mChildShape);
+    mColShape->setMargin((mVelMax.x > mVelMax.y ? mVelMax.x : mVelMax.y) + 0.1);
 
     motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(position.x, position.y, 0)));
     
@@ -33,7 +34,7 @@ void SquareAgent::initPhys(vector2 position)
     mRigidBody = new btRigidBody(consInf);
     mRigidBody->setSleepingThresholds(0.f, mRigidBody->getAngularSleepingThreshold());
     mRigidBody->setLinearFactor(btVector3(1, 1, 0));
-
+    
     mWorld->addRigidBody(mRigidBody);
 }
 

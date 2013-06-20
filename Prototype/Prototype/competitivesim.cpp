@@ -98,28 +98,6 @@ void CompetitiveSimulation::shutdown()
     }
 }
 
-void CompetitiveSimulation::clearPhysicsMetadata()
-{
-    btOverlappingPairCache* pairs = mBroadPhase->getOverlappingPairCache();
-    int numPairs = pairs->getNumOverlappingPairs();
-    btBroadphasePairArray pairArray = pairs->getOverlappingPairArray();
-    for(int x = 0; x < numPairs; x++)
-    {
-        btBroadphasePair& currPair = pairArray.at(x);
-        pairs->cleanOverlappingPair(currPair, mDispatcher);
-        pairs->removeOverlappingPair(currPair.m_pProxy0, currPair.m_pProxy1, mDispatcher);
-    }
-
-    int numManifolds = mWorld->getDispatcher()->getNumManifolds();
-    for (int i = 0 ; i < numManifolds; i++)
-    {
-        mDispatcher->releaseManifold(mDispatcher->getManifoldByIndexInternal(i));
-    }
-
-    mBroadPhase->resetPool(mDispatcher);
-    mSolver->reset();
-}
-
 void CompetitiveSimulation::reset()
 {
 
@@ -130,13 +108,13 @@ void CompetitiveSimulation::cycle(vector<NeuralNetwork> brains, unsigned int cur
     if(currentIteration > parameters.simulationCycles)
         return;
 
-    mWorld->stepSimulation(1.f, 15, 1/15.f);
+    mWorld->stepSimulation(1.f, 1, 1.f);
 
-    /*if(!isInBounds(mAgent1->getPosition().x, mAgent1->getPosition().y))
-        cout << "agent 1 dissapeared" << endl;
-
-    if(!isInBounds(mAgent2->getPosition().x, mAgent2->getPosition().y))
-        cout << "agent 2 dissapeared" << endl;*/
+    vector2 agent1Pos = mAgent1->getPosition(), agent2Pos = mAgent2->getPosition();
+    if(!isInBounds(agent1Pos.x, agent1Pos.y))
+        cout << "Agent 1 out of bounds with position " << agent1Pos.x << " " << agent1Pos.y << endl;
+    if(!isInBounds(agent2Pos.x, agent2Pos.y))
+        cout << "Agent 2 out of bounds with position " << agent2Pos.x << " " << agent2Pos.y << endl;
 
     if(currentIteration % parameters.cyclesPerDecision == 0)
     {
@@ -263,11 +241,6 @@ void CompetitiveSimulation::cycle(vector<NeuralNetwork> brains, unsigned int cur
         accel2.x = (a2output[0] - 0.5f)/2;
         accel2.y = (a2output[1] - 0.5f)/2;
 
-        if(accel1.x < -1 || accel1.x > 1 || accel1.y < -1 || accel1.y > 1)
-            cout << "agent 1 accel has a problem " << accel1.x << " " << accel1.y << endl;
-        if(accel2.x < -1 || accel2.x > 1 || accel2.y < -1 || accel2.y > 1)
-            cout << "agent 2 accel has a problem " << accel2.x << " " << accel2.y << endl;
-
         mAgent1->changeVelocity(accel1);
         mAgent2->changeVelocity(accel2);
     }
@@ -328,6 +301,10 @@ float CompetitiveSimulation::getDistanceLeft(unsigned int agent)
 
 float CompetitiveSimulation::evaluateFitness()
 {
+    vector2 agent1Pos = mAgent1->getPosition(), agent2Pos = mAgent2->getPosition();
+    if(!isInBounds(agent1Pos.x, agent1Pos.y) || !isInBounds(agent2Pos.x, agent2Pos.y))
+        return 10000;
+
     float agent1Dist = getDistanceLeft(0);
     float agent2Dist = getDistanceLeft(1);
 

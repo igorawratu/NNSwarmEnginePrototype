@@ -458,7 +458,7 @@ void GA::evaluateCompetitivePopulation(vector<vector<Chromosome>>& population, S
 {
     //assume two for now
     assert(population.size() == 2);
-
+    cout << "evaluating... " << endl;
     if(!fullSim)
     {
         vector<Chromosome> competeSetOne = getParents(population[1], mParameters.GApopulation/5);
@@ -542,7 +542,25 @@ vector<NeuralNetwork> GA::competePopulation(SimulationParams simParams)
 
         cout << "Generation " << k << endl;
 
-        evaluateCompetitivePopulation(populations, simParams, false);
+        evaluateCompetitivePopulation(populations, simParams, true);
+
+        CompetitiveSimulation sim(simParams, false);
+        vector<NeuralNetwork> brains;
+        brains.push_back(populations[0][0].getBrains()[0]);
+        brains.push_back(populations[1][0].getBrains()[0]);
+        sim.fullRun(brains);
+        float fit = sim.evaluateFitness();
+        sim.shutdown();
+        cout << "Best chromosome fitness for current generation: " << fit << endl;
+            
+        if(fit <= mParameters.epsilon)
+        {
+            cout << "Fitness below epsilon" << endl;
+            vector<NeuralNetwork> output;
+            for(int k = 0; k < populations.size(); k++)
+                output.push_back(populations[k][0].getBrains()[0]);
+            return output;
+        }
         
         for(int i = 0; i < mParameters.nnParameters.size(); i++)
         {
@@ -566,7 +584,74 @@ vector<NeuralNetwork> GA::competePopulation(SimulationParams simParams)
         }
         
     }
-    evaluateCompetitivePopulation(populations, simParams, false);
+    evaluateCompetitivePopulation(populations, simParams, true);
+    vector<NeuralNetwork> output;
+    for(int k = 0; k < populations.size(); k++)
+        output.push_back(populations[k][0].getBrains()[0]);
+
+    return output;
+}
+
+vector<NeuralNetwork> GA::competeSinglePopulation(SimulationParams simParams)
+{   
+    assert(mParameters.GApopulation > mParameters.elitismCount); 
+
+    unsigned long lastTime = time(0);
+
+    vector<vector<Chromosome>> populations;
+    for(int k = 0; k < mParameters.nnParameters.size(); k++)
+        populations.push_back(initializePopulation(simParams, k));
+
+    for(unsigned int k = 0; k < mParameters.maxGenerations; k++)
+    {
+        cout << "TIME ELAPSED SINCE LAST GENERATION: " << time(0) - lastTime << endl;
+        lastTime = time(0);
+
+        cout << "Generation " << k << endl;
+
+        evaluateCompetitivePopulation(populations, simParams, true);
+
+        CompetitiveSimulation sim(simParams, false);
+        vector<NeuralNetwork> brains;
+        brains.push_back(populations[0][0].getBrains()[0]);
+        brains.push_back(populations[1][0].getBrains()[0]);
+        sim.fullRun(brains);
+        float fit = sim.evaluateFitness();
+        sim.shutdown();
+        cout << "Best chromosome fitness for current generation: " << fit << endl;
+            
+        if(fit <= mParameters.epsilon)
+        {
+            cout << "Fitness below epsilon" << endl;
+            vector<NeuralNetwork> output;
+            for(int k = 0; k < populations.size(); k++)
+                output.push_back(populations[k][0].getBrains()[0]);
+            return output;
+        }
+        
+        for(int i = 0; i < mParameters.nnParameters.size(); i++)
+        {
+            vector<Chromosome> newPopulation = getFirst(populations[i], mParameters.elitismCount);
+            for(int l = 0; l < newPopulation.size(); l++)
+                newPopulation[l].mFitness = simParams.maxFitness;
+            while(newPopulation.size() < populations[i].size())
+            {
+                vector<Chromosome> offspring = crossover(populations[i], simParams.maxFitness, i);
+                newPopulation.insert(newPopulation.end(), offspring.begin(), offspring.end());
+            }
+
+            while(newPopulation.size() > populations[i].size())
+                newPopulation.pop_back();
+
+            populations[i] = newPopulation;
+
+            mutate(populations[i]);
+
+            conformWeights(populations[i]);
+        }
+        
+    }
+    evaluateCompetitivePopulation(populations, simParams, true);
     vector<NeuralNetwork> output;
     for(int k = 0; k < populations.size(); k++)
         output.push_back(populations[k][0].getBrains()[0]);
