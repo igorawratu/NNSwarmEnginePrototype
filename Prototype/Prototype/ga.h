@@ -31,6 +31,7 @@ struct GAParams
     float epsilon;
     Crossover crossoverType;
     vector<NeuralNetworkParameter> nnParameters;
+    bool fullSample;
 };
 
 
@@ -44,6 +45,7 @@ public:
 
     vector<NeuralNetwork> train(SimulationParams simParams);
     vector<NeuralNetwork> competePopulation(SimulationParams simParams);
+    vector<NeuralNetwork> competeSinglePopulation(SimulationParams simParams);
     void setParameters(GAParams parameters){mParameters = parameters;};
 
 private:
@@ -77,6 +79,7 @@ private:
     void conformWeights(vector<Chromosome>& population);
     void evaluatePopulation(vector<Chromosome>& population, SimulationParams simParams);
     void evaluateCompetitivePopulation(vector<vector<Chromosome>>& population, SimulationParams simParams, bool fullSim);
+    void evaluateCompetitiveSinglePopulation(vector<Chromosome>& population, SimulationParams simParams, bool fullSim);
 
 private:
     GAParams mParameters;

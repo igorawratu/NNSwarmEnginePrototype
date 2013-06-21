@@ -69,6 +69,7 @@ GAParams getGAParams()
     parameters.epsilon = 0.f;
     parameters.crossoverType = MULTIPOINT_CO;
     parameters.nnParameters = getNNParameters();
+    parameters.fullSample = false;
 
     return parameters;
 }
@@ -86,7 +87,8 @@ vector<NeuralNetwork> train()
 {
     GA ga(getGAParams());
     //return ga.competePopulation(getSimParams());
-    return ga.train(getSimParams());
+    //return ga.train(getSimParams());
+    return ga.competeSinglePopulation(getSimParams());
 }
 
 void writeResults(vector<NeuralNetwork> results)
