@@ -43,14 +43,14 @@ CompetitiveSimulation::CompetitiveSimulation(SimulationParams parameters, bool r
     pte7.x = 190; pte7.y = 600;
     pte8.x = 200; pte8.y = 610;
 
-    /*mIndicators.push_back(new Bar(pt1, pt2, pt3, pt4, mRenderable, mWorld));
+    mIndicators.push_back(new Bar(pt1, pt2, pt3, pt4, mRenderable, mWorld));
     mIndicators.push_back(new Bar(pt3, pt4, pt5, pt6, mRenderable, mWorld));
     mIndicators.push_back(new Bar(pt5, pt6, pt7, pt8, mRenderable, mWorld));
     mIndicators.push_back(new Bar(pte1, pte2, pte3, pte4, mRenderable, mWorld));
     mIndicators.push_back(new Bar(pte3, pte4, pte5, pte6, mRenderable, mWorld));
     mIndicators.push_back(new Bar(pte5, pte6, pte7, pte8, mRenderable, mWorld));
     mIndicators.push_back(new Bar(pte1, pte2, pt1, pt2, mRenderable, mWorld));
-    mIndicators.push_back(new Bar(pte8, pte7, pt8, pt7, mRenderable, mWorld));*/
+    mIndicators.push_back(new Bar(pte8, pte7, pt8, pt7, mRenderable, mWorld));
     
     vector2 a1pos, a2pos; vector4 a1col, a2col;
     a1col.g = a2col.g = 0;
@@ -309,6 +309,13 @@ float CompetitiveSimulation::evaluateFitness()
     float agent2Dist = getDistanceLeft(1);
 
     return agent1Dist + agent2Dist;
+}
+
+void CompetitiveSimulation::getIndividualFitness(float& agentOneFitness, float& agentTwoFitness)
+{
+    vector2 agent1Pos = mAgent1->getPosition(), agent2Pos = mAgent2->getPosition();
+    agentOneFitness = isInBounds(agent1Pos.x, agent1Pos.y) ? getDistanceLeft(0) : 10000;
+    agentTwoFitness = isInBounds(agent2Pos.x, agent2Pos.y) ? getDistanceLeft(1) : 10000;
 }
 
 float CompetitiveSimulation::getWinner()

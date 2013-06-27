@@ -9,7 +9,7 @@
 #include "neuralnetwork.h"
 #include "renderer.h"
 #include "competitivesim.h"
-#include "testsim.h"
+//#include "testsim.h"
 
 //#define MLEAKDEBUG
 
@@ -36,7 +36,7 @@ SimulationParams getSimParams()
     params.modelGroups = 2;
     params.simulationCycles = 2000;
     params.cyclesPerDecision = 10;
-    params.maxFitness = 10;
+    params.maxFitness = 50;
 
     return params;
 }
@@ -69,7 +69,7 @@ GAParams getGAParams()
     parameters.epsilon = 0.f;
     parameters.crossoverType = MULTIPOINT_CO;
     parameters.nnParameters = getNNParameters();
-    parameters.fullSample = false;
+    parameters.fullSample = true;
 
     return parameters;
 }
@@ -86,9 +86,10 @@ unsigned int initShader(Renderer& renderer)
 vector<NeuralNetwork> train()
 {
     GA ga(getGAParams());
-    //return ga.competePopulation(getSimParams());
+    return ga.competePopulation(getSimParams());
     //return ga.train(getSimParams());
-    return ga.competeSinglePopulation(getSimParams());
+    //return ga.competeSinglePopulation(getSimParams());
+    //return ga.modularTrain(getSimParams());
 }
 
 void writeResults(vector<NeuralNetwork> results)

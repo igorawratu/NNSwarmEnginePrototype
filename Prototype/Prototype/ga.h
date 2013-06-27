@@ -46,6 +46,7 @@ public:
     vector<NeuralNetwork> train(SimulationParams simParams);
     vector<NeuralNetwork> competePopulation(SimulationParams simParams);
     vector<NeuralNetwork> competeSinglePopulation(SimulationParams simParams);
+    vector<NeuralNetwork> modularTrain(SimulationParams simParams);
     void setParameters(GAParams parameters){mParameters = parameters;};
 
 private:
@@ -80,6 +81,7 @@ private:
     void evaluatePopulation(vector<Chromosome>& population, SimulationParams simParams);
     void evaluateCompetitivePopulation(vector<vector<Chromosome>>& population, SimulationParams simParams, bool fullSim);
     void evaluateCompetitiveSinglePopulation(vector<Chromosome>& population, SimulationParams simParams, bool fullSim);
+    void evaluateModularPopulation(vector<vector<Chromosome>>& population, SimulationParams simParams);
 
 private:
     GAParams mParameters;

@@ -524,6 +524,57 @@ void GA::evaluateCompetitivePopulation(vector<vector<Chromosome>>& population, S
     
 }
 
+void GA::evaluateModularPopulation(vector<vector<Chromosome>>& population, SimulationParams simParams)
+{
+    assert(population.size() == 2);
+
+    for(int i = 0; i < population[0].size(); i++)
+    {
+        float fitnessVal = 0;
+        vector<Chromosome> competeSetOne = getParents(population[1], 5);
+        for(int k = 0; k < competeSetOne.size(); k++)
+        {
+            CompetitiveSimulation sim(simParams, false);
+            vector<NeuralNetwork> brains;
+            brains.push_back(population[0][i].getBrains()[0]);
+            brains.push_back(competeSetOne[k].getBrains()[0]);
+            sim.fullRun(brains);
+            float a1Fit, a2Fit;
+            sim.getIndividualFitness(a1Fit, a2Fit);
+            fitnessVal += a1Fit;
+            sim.shutdown();
+        }
+        population[0][i].mFitness = fitnessVal / 5;
+    }
+
+    for(int i = 0; i < population[1].size(); i++)
+    {
+        float fitnessVal = 0;
+        vector<Chromosome> competeSetTwo = getParents(population[0], 5);
+        for(int k = 0; k < competeSetTwo.size(); k++)
+        {
+            CompetitiveSimulation sim(simParams, false);
+            vector<NeuralNetwork> brains;
+            brains.push_back(competeSetTwo[k].getBrains()[0]);
+            brains.push_back(population[1][i].getBrains()[0]);
+            sim.fullRun(brains);
+            float a1Fit, a2Fit;
+            sim.getIndividualFitness(a1Fit, a2Fit);
+            fitnessVal += a2Fit;
+            sim.shutdown();
+        }
+        population[1][i].mFitness = fitnessVal / 5;
+    }
+
+    quicksort(population[0], 0, population[0].size() - 1);
+    quicksort(population[1], 0, population[1].size() - 1);
+
+    for(int k = 0; k < population.size(); k++)
+        for(int i = 0; i < population[k].size(); i++)
+            cout << "Chromsome " << i << " of population " << k << " with fitness " << population[k][i].mFitness << endl;
+
+}
+
 void GA::evaluateCompetitiveSinglePopulation(vector<Chromosome>& population, SimulationParams simParams, bool fullSim)
 {
     for(int k = 0; k < population.size(); k++)
@@ -547,6 +598,75 @@ void GA::evaluateCompetitiveSinglePopulation(vector<Chromosome>& population, Sim
     for(int k = 0; k < population.size(); k++)
         cout << "Chromosome " << k << " with fitness " << population[k].mFitness << endl;
 }   
+
+vector<NeuralNetwork> GA::modularTrain(SimulationParams simParams)
+{
+    assert(mParameters.GApopulation > mParameters.elitismCount);
+    unsigned long lastTime = time(0);
+
+    vector<vector<Chromosome>> populations;
+
+    for(int k = 0; k < mParameters.nnParameters.size(); k++)
+        populations.push_back(initializePopulation(simParams, k));
+
+    for(unsigned int k = 0; k < mParameters.maxGenerations; k++)
+    {
+        cout << "TIME ELAPSED SINCE LAST GENERATION: " << time(0) - lastTime << endl;
+        lastTime = time(0);
+
+        cout << "Generation " << k << endl;
+
+        evaluateModularPopulation(populations, simParams);
+
+        CompetitiveSimulation sim(simParams, false);
+
+        vector<NeuralNetwork> brains;
+        for(int k = 0; k < populations.size(); k++)
+            brains.push_back(populations[k][0].getBrains()[0]);
+
+        sim.fullRun(brains);
+        float fit = sim.evaluateFitness();
+        sim.shutdown();
+        cout << "Best chromosome fitness for current generation: " << fit << endl;
+            
+        if(fit <= mParameters.epsilon)
+        {
+            cout << "Fitness below epsilon" << endl;
+            vector<NeuralNetwork> output;
+            for(int k = 0; k < populations.size(); k++)
+                output.push_back(populations[k][0].getBrains()[0]);
+            return output;
+        }
+        
+        for(int i = 0; i < mParameters.nnParameters.size(); i++)
+        {
+            vector<Chromosome> newPopulation = getFirst(populations[i], mParameters.elitismCount);
+            for(int l = 0; l < newPopulation.size(); l++)
+                newPopulation[l].mFitness = simParams.maxFitness;
+            while(newPopulation.size() < populations[i].size())
+            {
+                vector<Chromosome> offspring = crossover(populations[i], simParams.maxFitness, i);
+                newPopulation.insert(newPopulation.end(), offspring.begin(), offspring.end());
+            }
+
+            while(newPopulation.size() > populations[i].size())
+                newPopulation.pop_back();
+
+            populations[i] = newPopulation;
+
+            mutate(populations[i]);
+
+            conformWeights(populations[i]);
+        }
+    }
+
+    evaluateModularPopulation(populations, simParams);
+    vector<NeuralNetwork> output;
+    for(int k = 0; k < populations.size(); k++)
+        output.push_back(populations[k][0].getBrains()[0]);
+
+    return output;
+}
 
 vector<NeuralNetwork> GA::competePopulation(SimulationParams simParams)
 {   

@@ -28,6 +28,7 @@ public:
     virtual void shutdown();
     virtual float getWinner();
     void conformVelocities();
+    void getIndividualFitness(float& agentOneFitness, float& agentTwoFitness);
 
 private:
     float calcDistance(vector2 from, vector2 to);
